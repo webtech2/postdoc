@@ -3,25 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/wamp64/www/postdoc/app/Change.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/Author.php</file>
             <file>file:/C:/wamp64/www/postdoc/routes/web.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/Mapping.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/MappingSource.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/Type.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/MetadataProperty.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/DataHighwayLevel.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/Relationship.php</file>
-            <file>file:/C:/wamp64/www/postdoc/config/oracle.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/Http/Controllers/TestController.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/RelationshipElement.php</file>
-            <file>file:/C:/wamp64/www/postdoc/config/app.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/DataSource.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/DataSet.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/Traits/HasCompositePrimaryKeyTrait.php</file>
-            <file>file:/C:/wamp64/www/postdoc/.env</file>
-            <file>file:/C:/wamp64/www/postdoc/app/ErrorLog.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/DataItem.php</file>
+            <file>file:/C:/wamp64/www/postdoc/app/Http/Controllers/HomeController.php</file>
+            <file>file:/C:/wamp64/www/postdoc/resources/views/auth/login.blade.php</file>
+            <file>file:/C:/wamp64/www/postdoc/resources/views/auth/register.blade.php</file>
         </group>
     </open-files>
 </project-private>

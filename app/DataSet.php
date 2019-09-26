@@ -54,8 +54,13 @@ class DataSet extends Model
         return $this->hasMany('App\MetadataProperty', 'md_dataset_id');
     }      
         
-    
-    
+    public function lastChanged() // data items changed?
+    {
+        if ($this->changes) 
+            return $this->changes()->get()[0]->ch_datetime;
+        else 
+            return $this->ds_created;
+    }        
       
     
     

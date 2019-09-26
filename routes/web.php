@@ -14,3 +14,16 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Auth::routes([
+  'register' => false, 
+  'reset' => false, 
+  'verify' => false,
+]);
+
+Route::get('/home', 'HomeController@index')->name('home');
+
+Route::resource('source', 'SourceController');
+Route::resource('dataset', 'DataSetController');
+Route::resource('property', 'PropertyController');
+Route::resource('change', 'ChangeController');
