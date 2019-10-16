@@ -8,6 +8,7 @@ class Change extends Model
 {
     protected $table = 'change';
     protected $primaryKey = 'ch_id';
+    public $timestamps = false;
     
     public function changeType()
     {

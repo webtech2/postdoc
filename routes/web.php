@@ -25,5 +25,9 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::resource('source', 'SourceController');
 Route::resource('dataset', 'DataSetController');
-Route::resource('property', 'PropertyController');
+Route::get('sdataset/{sid}', 'DataSetController@sourceDSIndex');
+Route::resource('property', 'PropertyController')->except('store');
+Route::get('sproperty/{sid}/create', 'PropertyController@createForSource');
+Route::get('dsproperty/{id}/create', 'PropertyController@createForDataSet');
+Route::post('property/{object}/{id}', 'PropertyController@store');
 Route::resource('change', 'ChangeController');

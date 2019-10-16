@@ -38,6 +38,7 @@
                                 <td><a href="{{ url('source', $source->so_id) }}">{{$source->so_description}}</a></td>
                                 <td><a href="{{ url('source', $source->so_id) }}">{{$source->so_created}}</a></td>
                                 <td><a href="{{ url('source', $source->so_id) }}">{{$source->so_deleted}}</a></td>
+                                <td></td>
                             </tr>
                             
                         @endforeach   

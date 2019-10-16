@@ -9,6 +9,7 @@ class Type extends Model
     protected $table = 'types';
     protected $primaryKey = 'tp_id';
     public $incrementing = false;
+    public $timestamps = false;
     
     public function parentType()
     {

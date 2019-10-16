@@ -24,7 +24,7 @@ class SourceController extends Controller
      */
     public function index()
     {
-        $sources = DataSource::whereNull('so_deleted')->orderBy('so_created','desc')->get();
+        $sources = DataSource::whereNull('so_deleted')->orderBy('so_name')->get();
         $delsources = DataSource::whereNotNull('so_deleted')->orderBy('so_deleted','desc')->get();
         return view('sources.index', compact('sources', 'delsources'));
     }

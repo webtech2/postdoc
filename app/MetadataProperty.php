@@ -8,6 +8,7 @@ class MetadataProperty extends Model
 {
     protected $table = 'metadataproperty';
     protected $primaryKey = 'md_id';
+    public $timestamps = false;
 
     public function dataItem()
     {
