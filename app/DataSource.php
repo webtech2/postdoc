@@ -29,5 +29,10 @@ class DataSource extends Model
     {
         return ($this->changes ? $this->changes()->get()[0]->ch_datetime : $this->so_created);
     }
+
+    public function getID() 
+    {
+        return $this->attributes[$this->primaryKey];
+    }
     
 }

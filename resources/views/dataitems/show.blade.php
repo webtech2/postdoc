@@ -10,10 +10,9 @@
             </div>
             @endif
             <div class="card">
-                <div class="card-header"><h4>{{ $dset->ds_name }}</h4></div>
+                <div class="card-header"><h4>{{ $item->di_name }}</h4></div>
                 <div class="card-body">
-                <p class="card-text">{{ $dset->ds_description }}</p>
-                @if ($dset->dataSource) 
+                @if ($item->dataSource) 
                 <p class="card-text">Data source: <a href="{{ url('source', $dset->dataSource->so_id) }}">{{$dset->dataSource->so_name}}</a></p>
                 @endif
                 @if ($dset->dataHighwayLevel) 

@@ -139,7 +139,11 @@ class PropertyController extends Controller
      */
     public function edit($id)
     {
-        //
+        $prop=MetadataProperty::find($id);
+        $object=strtolower($prop->object()['objectType']);
+        $name=$prop->object()['objectName'];
+        $id=$prop->object()['object']->getID();
+        return view('properties.edit', compact('prop', 'object', 'id', 'name'));
     }
 
     /**

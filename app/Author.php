@@ -22,5 +22,11 @@ class Author extends Model
     public function user()
     {
         return $this->belongsTo('App\User', 'au_user_id');
-    }      
+    }
+    
+    public function getID() 
+    {
+        return $this->attributes[$primaryKey];
+    }
+    
 }

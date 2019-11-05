@@ -27,7 +27,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $sources = DataSource::whereNull('so_deleted')->orderBy('so_created','desc')->take(10)->get();
+        $sources = DataSource::whereNull('so_deleted')->orderBy('so_created','desc')->get();
         $dhlevels = DataHighwayLevel::all();
         $changes = Change::all();
         $mdproperties = MetadataProperty::all();

@@ -11,9 +11,7 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', 'HomeController@index')->name('home');
 
 Auth::routes([
   'register' => false, 
@@ -23,11 +21,13 @@ Auth::routes([
 
 Route::get('/home', 'HomeController@index')->name('home');
 
-Route::resource('source', 'SourceController');
+Route::resource('datasource', 'SourceController');
 Route::resource('dataset', 'DataSetController');
+Route::resource('dataitem', 'DataItemController');
 Route::get('sdataset/{sid}', 'DataSetController@sourceDSIndex');
 Route::resource('property', 'PropertyController')->except('store');
 Route::get('sproperty/{sid}/create', 'PropertyController@createForSource');
 Route::get('dsproperty/{id}/create', 'PropertyController@createForDataSet');
 Route::post('property/{object}/{id}', 'PropertyController@store');
 Route::resource('change', 'ChangeController');
+Route::resource('datahighway', 'DataHighwayController');

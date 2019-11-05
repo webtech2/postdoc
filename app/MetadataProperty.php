@@ -73,6 +73,39 @@ class MetadataProperty extends Model
             return get_class($this->relationship);
         }
     }
-            
+
+    public function object() 
+    {
+        $objectType;
+        $objectName;
+        if ($object=$this->dataItem) {
+            $objectType='DataItem';
+            $objectName=$object->di_name;
+        }
+        else if ($object=$this->mapping) {
+            $objectType='Mapping';    
+            $objectName=$object->targetDataItem->di_name;
+        }
+        else if ($object=$this->dataHighwayLevel) {
+            $objectType='DataHighwayLevel';   
+            $objectName=$object->hl_name;
+        } 
+        else if ($object=$this->dataSet) {
+            $objectType='DataSet';
+            $objectName=$object->ds_name;
+        } 
+        else if ($object=$this->dataSource) {
+            $objectType='DataSource';
+            $objectName=$object->so_name;
+        }  
+        else if ($object=$this->relationship) {
+            $objectType='Relationship';
+            $objectName=$object->parentDataItem->di_name;
+        }
+        else {
+            $object=null;
+        }
+        return compact('objectType', 'objectName', 'object');
+    }    
     
 }

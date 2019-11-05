@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class DataSet extends Model
 {
@@ -41,7 +42,7 @@ class DataSet extends Model
     
     public function dataItems()
     {
-        return $this->hasMany('App\DataItem', 'di_dataset_id');
+        return $this->hasMany('App\DataItem', 'di_dataset_id')->orderBy('di_id');
     }      
     
     public function changes()
@@ -62,6 +63,16 @@ class DataSet extends Model
             return $this->ds_created;
     }        
       
+    public function topDataItems()
+    {
+        if ($this->formatType->tp_type=='XML')
+            return $this->hasMany('App\DataItem', 'di_dataset_id')->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                     ->from('relationshipelement')
+                     ->whereRaw('re_child_dataitem_id = di_id');
+            })->orderBy('di_id');
+        else return $this->dataItems();
+    }      
     
     
 }
