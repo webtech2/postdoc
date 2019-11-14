@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Change;
 use Illuminate\Http\Request;
 
 class ChangeController extends Controller
@@ -45,7 +46,9 @@ class ChangeController extends Controller
      */
     public function show($id)
     {
-        //
+        $change = Change::find($id);
+        $object = $change->object();
+        return view('changes.show', compact('change','object'));
     }
 
     /**

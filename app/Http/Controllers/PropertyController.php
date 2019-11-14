@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Author;
 use App\Change;
+use App\DataItem;
 use App\DataSet;
 use App\DataSource;
 use App\MetadataProperty;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use function redirect;
+use function url;
 use function view;
 
 class PropertyController extends Controller
@@ -50,7 +52,7 @@ class PropertyController extends Controller
     public function createForSource($sid) 
     {
         $source=DataSource::find($sid);
-        $object = 'source';
+        $object = 'datasource';
         $id = $sid;
         $name=$source->so_name;
         return view('properties.create', compact('object', 'id', 'name'));
@@ -61,6 +63,14 @@ class PropertyController extends Controller
         $dset=DataSet::find($id);
         $object = 'dataset';
         $name=$dset->ds_name;
+        return view('properties.create', compact('object', 'id', 'name'));
+    }
+
+    public function createForDataItem($id) 
+    {
+        $item=DataItem::find($id);
+        $object = 'dataitem';
+        $name=$item->di_name;
         return view('properties.create', compact('object', 'id', 'name'));
     }
 
@@ -77,7 +87,7 @@ class PropertyController extends Controller
         $redirect;        
 
         switch ($object) {
-            case 'source':
+            case 'datasource':
                 $objcolumn = 'md_datasource_id';
                 $prop->dataSource()->associate(DataSource::find($id));
                 $redirect=redirect()->action('SourceController@show', $id)->withSuccess('New property added!');
@@ -86,6 +96,11 @@ class PropertyController extends Controller
                 $objcolumn = 'md_dataset_id';
                 $prop->dataSet()->associate(DataSet::find($id));
                 $redirect=redirect()->action('DataSetController@show', $id)->withSuccess('New property added!');
+                break;
+            case 'dataitem':
+                $objcolumn = 'md_dataitem_id';
+                $prop->dataItem()->associate(DataItem::find($id));
+                $redirect=redirect()->action('DataItemController@show', $id)->withSuccess('New property added!');
                 break;
         }
 
@@ -174,54 +189,43 @@ class PropertyController extends Controller
     {
         $prop = MetadataProperty::find($id);
         $object=$prop->object();
-        $objcolumn;
-        $redirect;        
-        switch ($object['objectType']) {
-            case 'DataSource':
-                $objcolumn = 'md_datasource_id';
-                $prop->dataSource()->associate($object['object']);
-                $redirect=redirect()->action('SourceController@show', $object['object']->so_id)->withSuccess('Property data changed!');
-                break;
-            case 'DataSet':
-                $objcolumn = 'md_dataset_id';
-                $prop->dataSet()->associate($object['object']);
-                $redirect=redirect()->action('DataSetController@show', $object['object']->ds_id)->withSuccess('Property data changed!');
-                break;
-        }
+        $redirect=redirect(url(strtolower($object['objectType']), $object['object']->getID()));
+        if ($prop->md_value != $request['value']) {
 
-        $validatedData = $request->validate([
-            'value' => [
-                'required',
-                'min:1',
-                'max:4000'
-             ]
-        ]);        
-        
-        $user = Auth::user();
-        $author = $user->author;
-        if (!$author) {
-            $author = new Author();
-            $author->au_id = DB::select('select AUTHOR_AU_ID_SEQ.nextval as au_id from dual')[0]->au_id; 
-            $author->au_username = $user->us_name;
-            $author->user()->associate($user);
-            $author->save();
-        }
-        
-        $change = new Change();
-        $change->ch_id = DB::select('select CHANGE_CH_ID_SEQ.nextval as ch_id from dual')[0]->ch_id; 
-        $change->ch_changetype_id = DB::select("select tp_id from types where tp_type='Metadata value update'")[0]->tp_id;
-        $change->ch_statustype_id = DB::select("select tp_id from types where tp_type='New'")[0]->tp_id;
-        $change->ch_attrname = 'md_value';
-        $change->ch_newattrvalue = $request['value'];
-        $change->ch_oldattrvalue = $prop->md_value;
-        $change->metadataProperty()->associate($prop);
-        $change->author()->associate($author);
-        $change->ch_datetime = Carbon::now();
-        $change->save();
+            $validatedData = $request->validate([
+                'value' => [
+                    'required',
+                    'min:1',
+                    'max:4000'
+                 ]
+            ]);        
 
-        $prop->md_value = $request['value'];       
-        $prop->save();
-        
+            $user = Auth::user();
+            $author = $user->author;
+            if (!$author) {
+                $author = new Author();
+                $author->au_id = DB::select('select AUTHOR_AU_ID_SEQ.nextval as au_id from dual')[0]->au_id; 
+                $author->au_username = $user->us_name;
+                $author->user()->associate($user);
+                $author->save();
+            }
+
+            $change = new Change();
+            $change->ch_id = DB::select('select CHANGE_CH_ID_SEQ.nextval as ch_id from dual')[0]->ch_id; 
+            $change->ch_changetype_id = DB::select("select tp_id from types where tp_type='Metadata value update'")[0]->tp_id;
+            $change->ch_statustype_id = DB::select("select tp_id from types where tp_type='New'")[0]->tp_id;
+            $change->ch_attrname = 'md_value';
+            $change->ch_newattrvalue = $request['value'];
+            $change->ch_oldattrvalue = $prop->md_value;
+            $change->metadataProperty()->associate($prop);
+            $change->author()->associate($author);
+            $change->ch_datetime = Carbon::now();
+            $change->save();
+
+            $prop->md_value = $request['value'];       
+            $prop->save();
+            $redirect = $redirect->withSuccess('Property data changed!');
+        }        
         return $redirect;        
     }
 

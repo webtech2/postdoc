@@ -1,6 +1,6 @@
                             <tr class="collapse show prop">
-                                <td><a href="{{ url('property', $prop->md_id) }}">{{$prop->md_name}}</a></td>
-                                <td><a href="{{ url('property', $prop->md_id) }}">{{$prop->md_value}}</a></td>
+                                <td><a href="{{ action('PropertyController@show', $prop->md_id) }}">{{$prop->md_name}}</a></td>
+                                <td><a href="{{ action('PropertyController@show', $prop->md_id) }}">{{$prop->md_value}}</a></td>
                                 <td>
                                     <form action="{{action('PropertyController@destroy', $prop->md_id)}}" method="post" class="delete-frm float-right" data-confirm="Are you sure to delete property: '{{$prop->md_name}}'?">
                                         @csrf

@@ -35,19 +35,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ( $source->dataSets as $dset )
-                            <tr class="collapse show set">
-                                <td><a href="{{ url('dataset', $dset->ds_id) }}" title="{{$dset->ds_description}}">{{$dset->ds_name}}</a></td>
-                                <td><a href="{{ url('dataset', $dset->ds_id) }}">{{$dset->formatType->tp_type}}</a></td>
-                                <td><a href="{{ url('dataset', $dset->ds_id) }}">{{$dset->ds_frequency}}</a></td>
-                                <td><a href="{{ url('dataset', $dset->ds_id) }}">{{$dset->velocityType->tp_type}}</a></td>
-                                <td><a href="{{ url('dataset', $dset->ds_id) }}">{{$dset->lastChanged()}}</a></td>
-                                <td>
-                                    <a href="{{ action('DataSetController@edit', $dset->ds_id) }}">Edit</a> |
-                                    <a href="{{ action('DataSetController@destroy', $dset->ds_id) }}">Delete</a>
-                                </td>
-                            </tr>
-                            @endforeach 
+                            @each ('partials.dataset', $source->dataSets, 'dset' )
                         </tbody>
                     </table>
                 </div>

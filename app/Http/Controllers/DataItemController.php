@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DataItem;
 use Illuminate\Http\Request;
 
 class DataItemController extends Controller
@@ -45,7 +46,8 @@ class DataItemController extends Controller
      */
     public function show($id)
     {
-        //
+        $item = DataItem::find($id);
+        return view('dataitems.show', compact('item'));
     }
 
     /**
