@@ -60,4 +60,9 @@ class Type extends Model
     {
         return $this->hasMany('App\Relationship', 'rl_relationshiptype_id');
     }    
+
+    public function getPK() 
+    {
+        return $this->primaryKey;
+    }
 }

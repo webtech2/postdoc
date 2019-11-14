@@ -58,7 +58,7 @@ class SourceController extends Controller
      */
     public function show($id)
     {
-        $source = DataSource::where('so_id','=',$id)->get()[0];
+        $source = DataSource::find($id);
         return view('sources.show', compact('source'));
     }
 

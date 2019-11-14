@@ -100,7 +100,12 @@ class Change extends Model
     
     public function getID() 
     {
-        return $this->attributes[$primaryKey];
+        return $this->attributes[$this->primaryKey];
+    }
+
+    public function getPK() 
+    {
+        return $this->primaryKey;
     }
 
     

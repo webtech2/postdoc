@@ -8,6 +8,7 @@ class Author extends Model
 {
     protected $table = 'author';
     protected $primaryKey = 'au_id';
+    public $timestamps = false;
     
     public function changes()
     {
@@ -26,7 +27,13 @@ class Author extends Model
     
     public function getID() 
     {
-        return $this->attributes[$primaryKey];
+        return $this->attributes[$this->primaryKey];
     }
+
+    public function getPK() 
+    {
+        return $this->primaryKey;
+    }
+    
     
 }

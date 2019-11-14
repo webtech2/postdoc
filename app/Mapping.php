@@ -4,20 +4,16 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Mapping extends Model
+class Mapping extends MetadataModelElement
 {
     protected $table = 'mapping';
     protected $primaryKey = 'mp_id';
-    
+    protected $changeColumn = 'ch_mapping_id';
+        
     public function targetDataItem()
     {
         return $this->belongsTo('App\DataItem', 'mp_target_dataitem_id');
-    }      
-    
-    public function changes()
-    {
-        return $this->hasMany('App\Change', 'ch_mapping_id');
-    }      
+    }          
     
     public function metadataProperties()
     {
@@ -28,5 +24,6 @@ class Mapping extends Model
     {
         return $this->hasMany('App\MappingOrigin', 'ms_mapping_id');
     }      
-    
+ 
+
 }

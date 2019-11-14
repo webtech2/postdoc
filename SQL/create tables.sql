@@ -21,9 +21,7 @@ CREATE TABLE change (
     ch_relationship_id       NUMBER(10),
     ch_datetime              DATE NOT NULL,
     ch_description           VARCHAR2(4000),
-    ch_attrname              unknown 
---  ERROR: Datatype UNKNOWN is not allowed 
-    ,
+    ch_attrname              VARCHAR2(50),
     ch_newattrvalue          VARCHAR2(4000),
     ch_oldattrvalue          VARCHAR2(4000)
 );
@@ -118,7 +116,9 @@ CREATE TABLE metadataproperty (
     md_datahighwaylevel_id   NUMBER(10),
     md_datasource_id         NUMBER(10),
     md_relationship_id       NUMBER(10),
-    md_datasetinstance_id    NUMBER(10)
+    md_datasetinstance_id    NUMBER(10),
+    md_created               DATE,
+    md_deleted               DATE
 );
 
 ALTER TABLE metadataproperty ADD CONSTRAINT metadataproperty_pk PRIMARY KEY ( md_id );

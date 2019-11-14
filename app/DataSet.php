@@ -5,10 +5,11 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class DataSet extends Model
+class DataSet extends MetadataModelElement
 {
     protected $table = 'dataset';
     protected $primaryKey = 'ds_id';
+    protected $changeColumn = 'ch_dataset_id';
     
     public function dataSource()
     {
@@ -44,24 +45,11 @@ class DataSet extends Model
     {
         return $this->hasMany('App\DataItem', 'di_dataset_id')->orderBy('di_id');
     }      
-    
-    public function changes()
-    {
-        return $this->hasMany('App\Change', 'ch_dataset_id');
-    }      
-    
+
     public function metadataProperties()
     {
         return $this->hasMany('App\MetadataProperty', 'md_dataset_id');
-    }      
-        
-    public function lastChanged() // data items changed?
-    {
-        if ($this->changes) 
-            return $this->changes()->get()[0]->ch_datetime;
-        else 
-            return $this->ds_created;
-    }        
+    }  
       
     public function topDataItems()
     {
@@ -73,6 +61,6 @@ class DataSet extends Model
             })->orderBy('di_id');
         else return $this->dataItems();
     }      
-    
-    
+
+
 }

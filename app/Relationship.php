@@ -4,10 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Relationship extends Model
+class Relationship extends MetadataModelElement
 {
     protected $table = 'relationship';
     protected $primaryKey = 'rl_id';
+    protected $changeColumn = 'ch_relationship_id';
     
     public function parentDataItem()
     {
@@ -17,11 +18,6 @@ class Relationship extends Model
     public function type()
     {
         return $this->belongsTo('App\Type', 'rl_relationshiptype_id');
-    }      
-
-    public function changes()
-    {
-        return $this->hasMany('App\Change', 'ch_relationship_id');
     }      
     
     public function metadataProperties()
@@ -33,4 +29,5 @@ class Relationship extends Model
     {
         return $this->hasMany('App\RelationshipElement', 're_relationship_id');
     }     
+
 }

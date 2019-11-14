@@ -19,7 +19,15 @@ class MappingSource extends Model
         return $this->belongsTo('App\DataItem', 'ms_origin_dataitem_id');
     }      
     
-    
+    public function getID() 
+    {
+        return $this->attributes[$this->primaryKey];
+    }    
+
+    public function getPK() 
+    {
+        return $this->primaryKey;
+    }
     
     
 }

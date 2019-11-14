@@ -9,19 +9,14 @@
                         <a href="{{ url($object, $id) }}">{{$name}}</a>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ action('PropertyController@update', ['id' => $prop->md_id]) }}">
+                    <form method="POST" action="{{ action('PropertyController@update', $prop->md_id) }}">
                         @csrf
+                        @method('PUT')
                         <div class="form-group row">
-                            <label for="name" class="col-md-4 col-form-label text-md-right">Name</label>
+                            <div class="col-md-4 col-form-label text-md-right">Name</div>
 
-                            <div class="col-md-6">
-                                <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name', $prop->md_name) }}" required autocomplete="name" autofocus>
-
-                                @error('name')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
+                            <div class="col-md-6 col-form-label">
+                                <div>{{ $prop->md_name }}</div>
                             </div>
                         </div>
                         <div class="form-group row">

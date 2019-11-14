@@ -4,10 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class DataHighwayLevel extends Model
+class DataHighwayLevel extends MetadataModelElement
 {
     protected $table = 'datahighwaylevel';
     protected $primaryKey = 'hl_id';
+    protected $changeColumn = 'ch_datahighwaylevel_id';
     
     public function dataSets()
     {
@@ -19,9 +20,8 @@ class DataHighwayLevel extends Model
         return $this->hasMany('App\MetadataProperty', 'md_datahighwaylevel_id');
     }
 
-    public function changes()
-    {
-        return $this->hasMany('App\Change', 'ch_datahighwaylevel_id');
-    }
+
+
+    
     
 }

@@ -18,5 +18,15 @@ class DataSetInstance extends Model
     {
         return $this->hasMany('App\MetadataProperty', 'md_datasetinstance_id');
     }  
+
+    public function getID() 
+    {
+        return $this->attributes[$this->primaryKey];
+    }  
+
+    public function getPK() 
+    {
+        return $this->primaryKey;
+    }
     
 }

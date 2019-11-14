@@ -22,5 +22,14 @@ class RelationshipElement extends Model
     {
         return $this->belongsTo('App\Relationship', 're_relationship_id');
     }  
-    
+
+    public function getID() 
+    {
+        return $this->attributes[$this->primaryKey];
+    }    
+
+    public function getPK() 
+    {
+        return $this->primaryKey;
+    }
 }

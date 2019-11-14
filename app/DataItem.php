@@ -4,10 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class DataItem extends Model
+class DataItem extends MetadataModelElement
 {
     protected $table = 'dataitem';
     protected $primaryKey = 'di_id';
+    protected $changeColumn = 'ch_dataitem_id';
     
     public function dataSet()
     {
@@ -37,12 +38,7 @@ class DataItem extends Model
     public function mappingOrigins()
     {
         return $this->hasMany('App\MappingOrigin', 'ms_origin_dataitem_id');
-    }      
-    
-    public function changes()
-    {
-        return $this->hasMany('App\Change', 'ch_dataitem_id');
-    }      
+    }        
     
     public function mappings()
     {
@@ -54,5 +50,6 @@ class DataItem extends Model
         return $this->hasMany('App\MetadataProperty', 'md_dataitem_id');
     }      
     
+
     
 }

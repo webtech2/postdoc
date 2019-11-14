@@ -4,12 +4,13 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class MetadataProperty extends Model
+class MetadataProperty extends MetadataModelElement
 {
     protected $table = 'metadataproperty';
     protected $primaryKey = 'md_id';
     public $timestamps = false;
-
+    protected $changeColumn = 'ch_metadataproperty_id';
+    
     public function dataItem()
     {
         return $this->belongsTo('App\DataItem', 'md_dataitem_id');
@@ -50,56 +51,45 @@ class MetadataProperty extends Model
         return $this->belongsTo('App\Relationship', 'md_relationship_id');
     }      
     
-    public function changes()
-    {
-        return $this->hasMany('App\Change', 'ch_metadataproperty_id');
-    }
-    
     public function elementType() 
     {
         if ($this->dataItem) {
-            return get_class($this->dataItem);
+            return substr(get_class($this->dataItem),4);
         } else if ($this->mapping) {
-            return get_class($this->mapping);
+            return substr(get_class($this->mapping),4);
         } else if ($this->dataHighwayLevel) {
-            return get_class($this->dataHighwayLevel);
+            return substr(get_class($this->dataHighwayLevel),4);
         } else if ($this->dataSet) {
-            return get_class($this->dataSet);
+            return substr(get_class($this->dataSet),4);
         } else if ($this->dataSetInstance) {
-            return get_class($this->dataSetInstance);
+            return substr(get_class($this->dataSetInstance),4);
         } else if ($this->dataSource) {
-            return get_class($this->dataSource);
+            return substr(get_class($this->dataSource),4);
         } else if ($this->relationship) {
-            return get_class($this->relationship);
+            return substr(get_class($this->relationship),4);
         }
     }
 
     public function object() 
     {
-        $objectType;
+        $objectType = $this->elementType();
         $objectName;
         if ($object=$this->dataItem) {
-            $objectType='DataItem';
             $objectName=$object->di_name;
         }
         else if ($object=$this->mapping) {
-            $objectType='Mapping';    
             $objectName=$object->targetDataItem->di_name;
         }
         else if ($object=$this->dataHighwayLevel) {
-            $objectType='DataHighwayLevel';   
             $objectName=$object->hl_name;
         } 
         else if ($object=$this->dataSet) {
-            $objectType='DataSet';
             $objectName=$object->ds_name;
         } 
         else if ($object=$this->dataSource) {
-            $objectType='DataSource';
             $objectName=$object->so_name;
         }  
         else if ($object=$this->relationship) {
-            $objectType='Relationship';
             $objectName=$object->parentDataItem->di_name;
         }
         else {

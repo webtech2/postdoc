@@ -40,5 +40,14 @@ class User extends Authenticatable
     {
         return $this->hasOne('App\Author', 'au_user_id');
     }    
+    
+    public function getID() 
+    {
+        return $this->attributes[$this->primaryKey];
+    }
 
+    public function getPK() 
+    {
+        return $this->primaryKey;
+    }
 }

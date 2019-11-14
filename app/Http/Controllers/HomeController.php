@@ -29,7 +29,7 @@ class HomeController extends Controller
     {
         $sources = DataSource::whereNull('so_deleted')->orderBy('so_created','desc')->get();
         $dhlevels = DataHighwayLevel::all();
-        $changes = Change::all();
+        $changes = Change::orderBy('ch_datetime', 'desc')->get();
         $mdproperties = MetadataProperty::all();
         return view('home', compact('sources', 'dhlevels', 'changes', 'mdproperties'));
     }

@@ -56,7 +56,7 @@
                 <div class="card">
                 <div data-toggle="collapse" data-target=".prop"  class="card-header font-weight-bold">Properties | 
                     <a href="{{action('PropertyController@createForSource', ['sid' => $source->so_id])}}">Create new<a></div>
-                @if ($source->metadataProperties()->count()>0)
+                @if ($source->metadataProperties()->whereNull('md_deleted')->count()>0)
                 <div class="card-text">
                     <table class="table table-hover">
                         <thead>
@@ -67,7 +67,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @each ('partials.property', $source->metadataProperties, 'prop' )
+                            @each ('partials.property', $source->metadataProperties()->whereNull('md_deleted')->get(), 'prop' )
                         </tbody>
                     </table>
                 </div>
@@ -86,7 +86,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @each ('partials.change', $source->changes()->orderBy('ch_datetime')->get(), 'change' )
+                            @each ('partials.change', $source->changes, 'change' )
                         </tbody>
                     </table>
                 </div>
