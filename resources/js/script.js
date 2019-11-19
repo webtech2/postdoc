@@ -12,3 +12,8 @@ for (var i = 0; i < deleteFrms.length; i++) {
         }
     });
 }
+
+var typeSelect = $('.type-select').on('change', function(event) {
+    $('.sub-type-select option').addClass('d-none').prop("selected",false);
+    $('.sub-type-select option[parent-type="'+$(this).val()+'"]').removeClass('d-none').eq(0).prop('selected',true);
+});

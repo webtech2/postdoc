@@ -2,9 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\DataHighwayLevel;
 use App\DataSet;
 use App\DataSource;
+use App\Http\Requests\StoreDataSet;
+use App\Type;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use PDO;
+use function view;
 
 class DataSetController extends Controller
 {
@@ -41,9 +48,20 @@ class DataSetController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create($object, $id)
     {
-        //
+        $coll;
+        switch ($object) {
+            case 'datasource':
+                $coll = DataSource::find($id);
+                break;
+            case 'datahighwaylevel':
+                $coll = DataHighwayLevel::find($id);
+                break;
+        }
+        $types = Type::where('tp_parenttype_id','DST0000000')->where('tp_id','<>','FMT0000000')->get();
+        $velocities = Type::where('tp_parenttype_id','VLT0000000')->get();
+        return view('datasets.create', compact('object', 'id', 'coll', 'types', 'velocities'));
     }
 
     /**
@@ -52,9 +70,25 @@ class DataSetController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreDataSet $request)
     {
-        //
+        $pdo = DB::getPdo();
+
+        $stmt = $pdo->prepare("begin POSTDOC_METADATA.GATHER_TABLE_METADATA(P_TABLE_NAME=>:P_TABLE_NAME, P_SO_ID=>:P_SO_ID, P_DS_DESC=>:P_DS_DESC, "
+                . "P_VELOCITY_ID=>:P_VELOCITY_ID, P_FORMATTYPE_ID=>:P_FORMATTYPE_ID, P_FREQ=>:P_FREQ, P_USERMAIL=>:P_USERMAIL); end;");
+        $temp = $request->all();
+        $mail = Auth::user()->us_email;
+        $stmt->bindParam(':P_TABLE_NAME', $temp['ds_name']);
+        $stmt->bindParam(':P_SO_ID', $temp['id'], PDO::PARAM_INT);
+        $stmt->bindParam(':P_DS_DESC', $temp['ds_desc']);
+        $stmt->bindParam(':P_VELOCITY_ID', $temp['velocity']);
+        $stmt->bindParam(':P_FORMATTYPE_ID', $temp['format']);
+        $stmt->bindParam(':P_FREQ', $temp['frequency']);
+        $stmt->bindParam(':P_USERMAIL', $mail);
+        $stmt->execute();               
+        
+       
+        return $request;
     }
 
     /**

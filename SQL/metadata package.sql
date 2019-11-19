@@ -5,7 +5,7 @@
 --  DDL for Package POSTDOC_METADATA
 --------------------------------------------------------
 
-  CREATE OR REPLACE EDITIONABLE PACKAGE "DSOLO"."POSTDOC_METADATA" AS 
+create or replace PACKAGE POSTDOC_METADATA AS 
     procedure gather_table_metadata (
         p_table_name in varchar2,
         p_ds_id in number default null,
@@ -15,7 +15,8 @@
         p_velocity_id in varchar2 default null,
         p_role_id in varchar2 default null,
         p_formattype_id in varchar2 default null,
-        p_freq in varchar2 default null
+        p_freq in varchar2 default null,
+        p_usermail in varchar2 default null
         );
         
     procedure gather_xml_metadata (
@@ -31,7 +32,6 @@
     );
 
 END POSTDOC_METADATA;
-
 /
 
 create or replace PACKAGE BODY POSTDOC_METADATA AS
@@ -156,14 +156,35 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
         p_velocity_id varchar2 default null, 
         p_role_id varchar2 default null, 
         p_formattype_id in varchar2 default null,
-        p_freq in varchar2 default null
+        p_freq in varchar2 default null,
+        p_usermail in varchar2 default null
         ) return number as
         
         v_ds_id number(10);
+        v_au_id number(10):=null;
+        v_us_id number(10):=null;
+        v_username varchar2(100);
+        v_ch_id number(10);
+        v_ch_type types.tp_id%type;
+        v_st_type types.tp_id%type;
     begin
-        insert into dataset (ds_name, ds_description, ds_datasource_id, ds_velocity_id, ds_role_id, ds_datahighwaylevel_id, ds_formattype_id, ds_frequency)
-          values (upper(p_name), p_desc, p_so_id, p_velocity_id, p_role_id, p_hl_id, p_formattype_id, p_freq);
+        insert into dataset (ds_name, ds_description, ds_datasource_id, ds_velocity_id, ds_role_id, ds_datahighwaylevel_id, ds_formattype_id, ds_frequency, ds_created)
+          values (upper(p_name), p_desc, p_so_id, p_velocity_id, p_role_id, p_hl_id, p_formattype_id, p_freq, sysdate);
         select dataset_ds_id_seq.currval into v_ds_id from dual;
+        if p_usermail is not null then
+            begin
+                select au_id into v_au_id from author join user_tab on au_user_id=us_id where us_email=p_usermail;
+            exception when no_data_found then
+                select us_id, us_name into v_us_id, v_username from user_tab where us_email = p_usermail;
+                insert into author values (AUTHOR_AU_ID_SEQ.nextval, v_username, v_us_id);
+                select AUTHOR_AU_ID_SEQ.currval into v_au_id from dual;
+            end;
+        end if;
+        select tp_id into v_ch_type from types where tp_type='Addition';
+        select tp_id into v_st_type from types where tp_type='New';
+        insert into change (CH_ID, CH_CHANGETYPE_ID, CH_STATUSTYPE_ID, CH_DATASET_ID, CH_AUTHOR_ID, CH_DATETIME) 
+                    values (CHANGE_CH_ID_SEQ.nextval, v_ch_type, v_st_type, v_ds_id, v_au_id, sysdate);
+        commit;
         return v_ds_id;
     end insert_dataset;
 
@@ -176,7 +197,8 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
         p_velocity_id in varchar2 default null,
         p_role_id in varchar2 default null,
         p_formattype_id in varchar2 default null,
-        p_freq in varchar2 default null
+        p_freq in varchar2 default null,
+        p_usermail in varchar2 default null
         ) AS
         
         v_ds_id number(10):=p_ds_id;
@@ -185,7 +207,7 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
   BEGIN
     if p_ds_id is not null or (p_hl_id is not null or p_so_id is not null) and p_velocity_id is not null and p_formattype_id is not null then
         if p_ds_id is null then -- no existing data set, must create one
-            v_ds_id:=insert_dataset(p_table_name, p_ds_desc, p_so_id, p_hl_id, p_velocity_id, p_role_id, p_formattype_id, p_freq);
+            v_ds_id:=insert_dataset(p_table_name, p_ds_desc, p_so_id, p_hl_id, p_velocity_id, p_role_id, p_formattype_id, p_freq, p_usermail);
         end if;
         for v_tab_col in (select * from all_tab_columns where owner=v_owner and table_name = v_table) loop
             insert_column_metadata(v_tab_col, v_ds_id);

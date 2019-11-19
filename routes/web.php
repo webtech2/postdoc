@@ -22,7 +22,8 @@ Auth::routes([
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::resource('datasource', 'SourceController');
-Route::resource('dataset', 'DataSetController');
+Route::resource('dataset', 'DataSetController')->except('create');;
+Route::get('dataset/create/{object}/{id}', 'DataSetController@create');
 Route::resource('dataitem', 'DataItemController');
 Route::get('sdataset/{sid}', 'DataSetController@sourceDSIndex');
 Route::resource('metadataproperty', 'PropertyController')->except('store');

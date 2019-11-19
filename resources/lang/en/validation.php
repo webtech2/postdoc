@@ -145,6 +145,8 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'ds_name' => 'data set name'
+    ],
 
 ];

@@ -20,7 +20,7 @@
                 @endif
                 <div class="card">
                 <div data-toggle="collapse" data-target=".set" class="card-header font-weight-bold">Data Sets | 
-                    <a href="{{action('DataSetController@create')}}">Create new<a></div>
+                    <a href="{{action('DataSetController@create', ['object' => 'datasource', 'id' => $source->so_id])}}">Create new<a></div>
                 @if ($source->dataSets()->count()>0)
                 <div class="card-text">
                     <table class="table table-hover">
