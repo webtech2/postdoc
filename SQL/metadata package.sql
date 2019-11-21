@@ -31,6 +31,10 @@ create or replace PACKAGE POSTDOC_METADATA AS
         p_freq in varchar2 default null        
     );
 
+  procedure compare_table_structure (
+        p_table_name in varchar2,
+        p_ds_id in number default null
+    );
 END POSTDOC_METADATA;
 /
 
@@ -46,7 +50,7 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
   c_type_xmlattr varchar2(10):='DIT0000003';
   c_meta_prop t_meta_prop := t_meta_prop('DATA_TYPE', 'DATA_LENGTH', 'DATA_PRECISION', 'DATA_SCALE', 'NULLABLE');
   
-  procedure insert_column_metadata (v_tab_col in all_tab_columns%rowtype, v_ds_id number) AS
+  function insert_column_metadata (v_tab_col in all_tab_columns%rowtype, v_ds_id number) return number AS
     v_di_id number(10);
     begin
         insert into dataitem (di_name, di_dataset_id, di_itemtype_id) values (v_tab_col.column_name, v_ds_id, c_type_col);
@@ -61,6 +65,7 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
             insert into metadataProperty (md_name, md_value, md_dataitem_id) values (c_meta_prop(4),v_tab_col.DATA_SCALE,v_di_id);
         end if;
         insert into metadataProperty (md_name, md_value, md_dataitem_id) values (c_meta_prop(5),v_tab_col.NULLABLE,v_di_id);
+        return v_di_id;
   end insert_column_metadata;
   
   function get_ds_id_for_table (p_owner varchar2, p_table_name varchar2, p_so_id number default null, p_hl_id number default null) return number as
@@ -148,6 +153,19 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
     end if;
   end insert_constraint_metadata;
   
+  function get_author_id_by_usermail (p_usermail in varchar2) return number as
+    v_au_id number(10);
+    v_us_id number(10):=null;
+    v_username varchar2(100);
+  begin
+    select au_id into v_au_id from author join user_tab on au_user_id=us_id where us_email=p_usermail;
+  exception when no_data_found then
+    select us_id, us_name into v_us_id, v_username from user_tab where us_email = p_usermail;
+    insert into author values (AUTHOR_AU_ID_SEQ.nextval, v_username, v_us_id);
+    select AUTHOR_AU_ID_SEQ.currval into v_au_id from dual;  
+    return v_au_id;
+  end get_author_id_by_usermail;
+  
   function insert_dataset (
         p_name in varchar2, 
         p_desc in varchar2 default null, 
@@ -162,8 +180,6 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
         
         v_ds_id number(10);
         v_au_id number(10):=null;
-        v_us_id number(10):=null;
-        v_username varchar2(100);
         v_ch_id number(10);
         v_ch_type types.tp_id%type;
         v_st_type types.tp_id%type;
@@ -172,13 +188,7 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
           values (upper(p_name), p_desc, p_so_id, p_velocity_id, p_role_id, p_hl_id, p_formattype_id, p_freq, sysdate);
         select dataset_ds_id_seq.currval into v_ds_id from dual;
         if p_usermail is not null then
-            begin
-                select au_id into v_au_id from author join user_tab on au_user_id=us_id where us_email=p_usermail;
-            exception when no_data_found then
-                select us_id, us_name into v_us_id, v_username from user_tab where us_email = p_usermail;
-                insert into author values (AUTHOR_AU_ID_SEQ.nextval, v_username, v_us_id);
-                select AUTHOR_AU_ID_SEQ.currval into v_au_id from dual;
-            end;
+          v_au_id:=get_author_id_by_usermail(p_usermail);
         end if;
         select tp_id into v_ch_type from types where tp_type='Addition';
         select tp_id into v_st_type from types where tp_type='New';
@@ -202,6 +212,7 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
         ) AS
         
         v_ds_id number(10):=p_ds_id;
+        v_di_id number(10);
         v_owner varchar2(100):=substr(upper(p_table_name),1,instr(p_table_name,'.')-1);
         v_table varchar2(100):=substr(upper(p_table_name),instr(p_table_name,'.')+1);
   BEGIN
@@ -210,7 +221,7 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
             v_ds_id:=insert_dataset(p_table_name, p_ds_desc, p_so_id, p_hl_id, p_velocity_id, p_role_id, p_formattype_id, p_freq, p_usermail);
         end if;
         for v_tab_col in (select * from all_tab_columns where owner=v_owner and table_name = v_table) loop
-            insert_column_metadata(v_tab_col, v_ds_id);
+            v_di_id:=insert_column_metadata(v_tab_col, v_ds_id);
         end loop;
         -- outgoing constraints
         for v_cons in (select * from ALL_CONSTRAINTS where owner=v_owner and table_name = v_table) loop
@@ -223,6 +234,85 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
         end loop;
     end if;
   END gather_table_metadata;
+  
+  procedure property_value_change (p_md_id in number, p_old in varchar2, p_new in varchar2, p_attrname in varchar2, p_usermail in varchar2 default null) as
+    v_au_id number(10):=null;
+    v_ch_type types.tp_id%type;
+    v_st_type types.tp_id%type;
+  begin
+    if p_usermail is not null then
+      v_au_id:=get_author_id_by_usermail(p_usermail);
+    end if;
+    select tp_id into v_ch_type from types where tp_type='Metadata value update';
+    select tp_id into v_st_type from types where tp_type='New';
+    update metadataproperty set md_value=p_new where md_id=p_md_id;
+    insert into change (CH_ID, CH_CHANGETYPE_ID, CH_STATUSTYPE_ID, CH_METADATAPROPERTY_ID, CH_AUTHOR_ID, CH_DATETIME, CH_NEWATTRVALUE, CH_OLDATTRVALUE, CH_ATTRNAME) 
+                values (CHANGE_CH_ID_SEQ.nextval, v_ch_type, v_st_type, p_md_id, v_au_id, sysdate, p_new, p_old, p_attrname);
+    commit;
+  end property_value_change;
+  
+  procedure compare_column_metadata(p_tab_col in all_tab_columns%rowtype, p_ds_id number) AS
+    v_di dataitem%rowtype;
+    v_di_id number(10);
+    v_count number(10);
+    v_ch_type types.tp_id%type;
+    v_st_type types.tp_id%type;
+  begin
+    select count(*) into v_count from dataitem where di_dataset_id=p_ds_id and di_name=p_tab_col.column_name;
+    if v_count=0 then -- data item is new
+      v_di_id:=insert_column_metadata (p_tab_col, p_ds_id);
+      select tp_id into v_ch_type from types where tp_type='Addition';
+      select tp_id into v_st_type from types where tp_type='New';
+      insert into change (CH_ID, CH_CHANGETYPE_ID, CH_STATUSTYPE_ID, CH_DATAITEM_ID, CH_DATETIME) 
+                  values (CHANGE_CH_ID_SEQ.nextval, v_ch_type, v_st_type, v_di_id, sysdate);
+    else -- data item is present in metadata
+      select * into v_di from dataitem where di_dataset_id=p_ds_id and di_name=p_tab_col.column_name;
+      -- compare metadata properties
+      for v_meta in (select * from metadataProperty where md_dataitem_id=v_di.di_id and md_deleted is null -- selecting properties that are already in metadata
+                     and md_name in (select tp_type from types where tp_parenttype_id='MPR0000000')) loop
+        case (v_meta.md_name) 
+        when c_meta_prop(1) then 
+          if p_tab_col.DATA_TYPE<>v_meta.md_value then -- change in metadata property value
+            property_value_change(v_meta.md_id, v_meta.md_value, p_tab_col.DATA_TYPE, c_meta_prop(1));
+          end if;
+        when c_meta_prop(2) then 
+          if p_tab_col.DATA_LENGTH<>v_meta.md_value then -- change in metadata property value
+            property_value_change(v_meta.md_id, v_meta.md_value, p_tab_col.DATA_LENGTH, c_meta_prop(1));
+          end if;
+        when c_meta_prop(3) then 
+          if p_tab_col.DATA_PRECISION<>v_meta.md_value then -- change in metadata property value
+            property_value_change(v_meta.md_id, v_meta.md_value, p_tab_col.DATA_PRECISION,c_meta_prop(1));
+          end if;
+        when c_meta_prop(4) then 
+          if p_tab_col.DATA_SCALE<>v_meta.md_value then -- change in metadata property value
+            property_value_change(v_meta.md_id, v_meta.md_value, p_tab_col.DATA_SCALE, c_meta_prop(1));
+          end if;
+        when c_meta_prop(5) then 
+          insert into error_log values (sysdate, v_meta.md_id||'; '||p_tab_col.NULLABLE||'; '||v_meta.md_value);
+          if p_tab_col.NULLABLE<>v_meta.md_value then -- change in metadata property value
+            property_value_change(v_meta.md_id, v_meta.md_value, p_tab_col.NULLABLE, c_meta_prop(1));
+          end if;
+        end case;
+      end loop;
+    end if;
+    commit;      
+  end compare_column_metadata;
+  
+  procedure compare_table_structure (
+        p_table_name in varchar2,
+        p_ds_id in number default null
+        ) AS
+
+        v_owner varchar2(100):=substr(upper(p_table_name),1,instr(p_table_name,'.')-1);
+        v_table varchar2(100):=substr(upper(p_table_name),instr(p_table_name,'.')+1);
+  begin
+    if p_ds_id is not null then
+        for v_tab_col in (select * from all_tab_columns where owner=v_owner and table_name = v_table) loop
+            compare_column_metadata(v_tab_col, p_ds_id);
+        end loop;
+    end if;
+  end compare_table_structure;
+        
   
   procedure insert_xml_children_metadata (p_spec varchar2, p_item luadm.xml_nodes%rowtype, p_ds_id in number, p_parent_di_id in number) as
     v_di_id number(10);

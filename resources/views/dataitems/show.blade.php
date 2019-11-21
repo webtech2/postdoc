@@ -49,6 +49,8 @@
                                 <th scope="col">Type</th>
                                 <th scope="col">Status</th>
                                 <th scope="col">Date</th>
+                                <th scope="col">Object Type</th>
+                                <th scope="col">Object</th>
                             </tr>
                         </thead>
                         <tbody>

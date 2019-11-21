@@ -436,6 +436,13 @@ INSERT INTO types VALUES (
     'RLT0000000'
 );
 
+insert into types values ('MPR0000000', 'Pre-defined metadata property', null);
+insert into types values ('MPR0000001', 'DATA_TYPE', 'MPR0000000');
+insert into types values ('MPR0000002', 'DATA_LENGTH', 'MPR0000000');
+insert into types values ('MPR0000003', 'DATA_PRECISION', 'MPR0000000');
+insert into types values ('MPR0000004', 'DATA_SCALE', 'MPR0000000');
+insert into types values ('MPR0000005', 'NULLABLE', 'MPR0000000');
+
 ALTER TABLE types ADD CONSTRAINT type_pk PRIMARY KEY ( tp_id );
 
 CREATE TABLE user_tab (
