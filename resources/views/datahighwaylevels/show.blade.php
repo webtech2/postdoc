@@ -10,18 +10,17 @@
             </div>
             @endif
             <div class="card">
-                <div class="card-header"><h4>{{ $source->so_name }}</h4></div>
+                <div class="card-header"><h4>{{ $dhlevel->hl_name }}</h4></div>
                 <div class="card-body">
-                <p class="card-text">{{ $source->so_description }}</p>
-                <p class="card-text">Created: {{ $source->so_created }}</p>
-                <p class="card-text">Changed: {{ $source->lastChanged() }}</p>
-                @if ($source->so_deleted)
-                <p class="card-text">Deleted: {{ $source->so_deleted }}</p>
+                <p class="card-text">Created: {{ $dhlevel->hl_created }}</p>
+                <p class="card-text">Changed: {{ $dhlevel->lastChanged() }}</p>
+                @if ($dhlevel->so_deleted)
+                <p class="card-text">Deleted: {{ $dhlevel->hl_deleted }}</p>
                 @endif
                 <div class="card">
                 <div data-toggle="collapse" data-target=".set" class="card-header font-weight-bold">Data Sets | 
-                    <a href="{{action('DataSetController@create', ['object' => 'datasource', 'id' => $source->so_id])}}">Create new<a></div>
-                @if ($source->dataSets()->count()>0)
+                    <a href="{{action('DataSetController@create', ['object' => 'datahighwaylevel', 'id' => $dhlevel->hl_id])}}">Create new<a></div>
+                @if ($dhlevel->dataSets()->count()>0)
                 <div class="card-text">
                     <table class="table table-hover">
                         <thead>
@@ -35,7 +34,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @each ('partials.dataset', $source->dataSets, 'dset' )
+                            @each ('partials.dataset', $dhlevel->dataSets, 'dset' )
                         </tbody>
                     </table>
                 </div>
@@ -43,8 +42,8 @@
                 </div>
                 <div class="card">
                 <div data-toggle="collapse" data-target=".prop"  class="card-header font-weight-bold">Properties | 
-                    <a href="{{action('PropertyController@createForSource', ['sid' => $source->so_id])}}">Create new<a></div>
-                @if ($source->metadataProperties()->whereNull('md_deleted')->count()>0)
+                    <a href="{{action('PropertyController@createForDHlevel', ['hlid' => $dhlevel->hl_id])}}">Create new<a></div>
+                @if ($dhlevel->metadataProperties()->whereNull('md_deleted')->count()>0)
                 <div class="card-text">
                     <table class="table table-hover">
                         <thead>
@@ -55,7 +54,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @each ('partials.property', $source->metadataProperties()->whereNull('md_deleted')->get(), 'prop' )
+                            @each ('partials.property', $dhlevel->metadataProperties()->whereNull('md_deleted')->get(), 'prop' )
                         </tbody>
                     </table>
                 </div>
@@ -63,7 +62,7 @@
                 </div>                    
                 <div class="card">
                 <div  data-toggle="collapse" data-target=".change" class="card-header font-weight-bold">Changes</div>
-                @if ($source->changes()->count()>0)
+                @if ($dhlevel->changes()->count()>0)
                 <div class="card-text">
                     <table class="table table-hover">
                         <thead>
@@ -76,7 +75,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @each ('partials.change', $source->changes, 'change' )
+                            @each ('partials.change', $dhlevel->changes, 'change' )
                         </tbody>
                     </table>
                 </div>

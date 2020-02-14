@@ -36,7 +36,8 @@ ALTER TABLE change ADD CONSTRAINT change_pk PRIMARY KEY ( ch_id );
 CREATE TABLE datahighwaylevel (
     hl_id        NUMBER(10) NOT NULL,
     hl_name      VARCHAR2(100) NOT NULL,
-    hl_created   DATE
+    hl_created   DATE,
+	hl_deleted 	 DATE
 );
 
 ALTER TABLE datahighwaylevel ADD CONSTRAINT datahighwaylevel_pk PRIMARY KEY ( hl_id );

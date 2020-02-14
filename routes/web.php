@@ -30,6 +30,7 @@ Route::resource('metadataproperty', 'PropertyController')->except('store');
 Route::get('sproperty/{sid}/create', 'PropertyController@createForSource');
 Route::get('dsproperty/{id}/create', 'PropertyController@createForDataSet');
 Route::get('diproperty/{id}/create', 'PropertyController@createForDataItem');
+Route::get('dhlproperty/{hlid}/create', 'PropertyController@createForDHlevel');
 Route::post('property/{object}/{id}', 'PropertyController@store');
 Route::resource('change', 'ChangeController');
-Route::resource('datahighway', 'DataHighwayController');
+Route::resource('datahighwaylevel', 'DataHighwayController');

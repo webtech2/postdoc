@@ -9,6 +9,7 @@ class DataHighwayLevel extends MetadataModelElement
     protected $table = 'datahighwaylevel';
     protected $primaryKey = 'hl_id';
     protected $changeColumn = 'ch_datahighwaylevel_id';
+    public $timestamps = false;
     
     public function dataSets()
     {

@@ -6,10 +6,10 @@
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">Create new data set for 
-                    @if ($object='datasource')
+                <div class="card-header">Create a new data set for a 
+                    @if ($object=='datasource')
                         data source <a href="{{ url($object, $id) }}">{{$coll->so_name}}</a>
-                    @elseif ($object='datahighwaylevel')
+                    @elseif ($object=='datahighwaylevel')
                         data highway level <a href="{{ url($object, $id) }}">{{$coll->hl_name}}</a>
                     @endif
                 </div>

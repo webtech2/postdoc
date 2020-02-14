@@ -38,12 +38,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                    @foreach ( $dhlevels as $dhlevel )
-                        <tr class="collapse show level">
-                            <td><a href="{{ action('DataHighwayController@show', $dhlevel->hl_id) }}">{{ $dhlevel->hl_name }}</a></td>
-                            <td><a href="{{ action('DataHighwayController@show', $dhlevel->hl_id) }}">{{$dhlevel->hl_created}}</a></td>
-                        </tr>
-                    @endforeach                    
+                        @each ('partials.datahighwaylevel', $dhlevels, 'dhlevel' )
                     </tbody>
                     </table>
                 </div>

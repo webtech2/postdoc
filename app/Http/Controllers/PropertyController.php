@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Author;
 use App\Change;
+use App\DataHighwayLevel;
 use App\DataItem;
 use App\DataSet;
 use App\DataSource;
@@ -57,7 +58,16 @@ class PropertyController extends Controller
         $name=$source->so_name;
         return view('properties.create', compact('object', 'id', 'name'));
     }
-        
+
+    public function createForDHlevel($hlid) 
+    {
+        $dhlevel=DataHighwayLevel::find($hlid);
+        $object = 'datahighwaylevel';
+        $id = $hlid;
+        $name=$dhlevel->hl_name;
+        return view('properties.create', compact('object', 'id', 'name'));
+    }
+    
     public function createForDataSet($id) 
     {
         $dset=DataSet::find($id);
@@ -101,6 +111,11 @@ class PropertyController extends Controller
                 $objcolumn = 'md_dataitem_id';
                 $prop->dataItem()->associate(DataItem::find($id));
                 $redirect=redirect()->action('DataItemController@show', $id)->withSuccess('New property added!');
+                break;
+            case 'datahighwaylevel':
+                $objcolumn = 'md_datahighwaylevel_id';
+                $prop->dataHighwayLevel()->associate(DataHighwayLevel::find($id));
+                $redirect=redirect()->action('DataHighwayController@show', $id)->withSuccess('New property added!');
                 break;
         }
 
