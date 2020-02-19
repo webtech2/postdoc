@@ -72,22 +72,44 @@ class DataSetController extends Controller
      */
     public function store(StoreDataSet $request)
     {
-        $pdo = DB::getPdo();
-
-        $stmt = $pdo->prepare("begin POSTDOC_METADATA.GATHER_TABLE_METADATA(P_TABLE_NAME=>:P_TABLE_NAME, P_SO_ID=>:P_SO_ID, P_DS_DESC=>:P_DS_DESC, "
-                . "P_VELOCITY_ID=>:P_VELOCITY_ID, P_FORMATTYPE_ID=>:P_FORMATTYPE_ID, P_FREQ=>:P_FREQ, P_USERMAIL=>:P_USERMAIL); end;");
         $temp = $request->all();
+        $stmt;
+        $pdo = DB::getPdo();
+        switch ($temp['format']) { 
+            case Type::where('tp_type','Relational')->first()->tp_id: // relational
+                if ($temp['object'] == 'datahighwaylevel') {
+                    $stmt = $pdo->prepare("begin POSTDOC_METADATA.GATHER_TABLE_METADATA(P_TABLE_NAME=>:P_TABLE_NAME, P_HL_ID=>:P_HL_ID, P_DS_DESC=>:P_DS_DESC, "
+                            . "P_VELOCITY_ID=>:P_VELOCITY_ID, P_FORMATTYPE_ID=>:P_FORMATTYPE_ID, P_FREQ=>:P_FREQ, P_USERMAIL=>:P_USERMAIL); end;");
+                    $stmt->bindParam(':P_HL_ID', $temp['id'], PDO::PARAM_INT);
+
+                } else {
+                    $stmt = $pdo->prepare("begin POSTDOC_METADATA.GATHER_TABLE_METADATA(P_TABLE_NAME=>:P_TABLE_NAME, P_SO_ID=>:P_SO_ID, P_DS_DESC=>:P_DS_DESC, "
+                            . "P_VELOCITY_ID=>:P_VELOCITY_ID, P_FORMATTYPE_ID=>:P_FORMATTYPE_ID, P_FREQ=>:P_FREQ, P_USERMAIL=>:P_USERMAIL); end;");            
+                    $stmt->bindParam(':P_SO_ID', $temp['id'], PDO::PARAM_INT);
+                }
+                $stmt->bindParam(':P_TABLE_NAME', $temp['ds_name']);
+                break;
+            case Type::where('tp_type','XML')->first()->tp_id: // XML
+                if ($temp['object'] == 'datahighwaylevel') {
+                    $stmt = $pdo->prepare("begin POSTDOC_METADATA.GATHER_XML_METADATA(P_SPEC=>:P_SPEC, P_HL_ID=>:P_HL_ID, P_DS_DESC=>:P_DS_DESC, "
+                            . "P_VELOCITY_ID=>:P_VELOCITY_ID, P_FORMATTYPE_ID=>:P_FORMATTYPE_ID, P_FREQ=>:P_FREQ, P_USERMAIL=>:P_USERMAIL); end;");
+                    $stmt->bindParam(':P_HL_ID', $temp['id'], PDO::PARAM_INT);
+
+                } else {
+                    $stmt = $pdo->prepare("begin POSTDOC_METADATA.GATHER_XML_METADATA(P_SPEC=>:P_SPEC, P_SO_ID=>:P_SO_ID, P_DS_DESC=>:P_DS_DESC, "
+                            . "P_VELOCITY_ID=>:P_VELOCITY_ID, P_FORMATTYPE_ID=>:P_FORMATTYPE_ID, P_FREQ=>:P_FREQ, P_USERMAIL=>:P_USERMAIL); end;");            
+                    $stmt->bindParam(':P_SO_ID', $temp['id'], PDO::PARAM_INT);
+                }                
+                $stmt->bindParam(':P_SPEC', $temp['ds_name']);
+                break;
+        }              
         $mail = Auth::user()->us_email;
-        $stmt->bindParam(':P_TABLE_NAME', $temp['ds_name']);
-        $stmt->bindParam(':P_SO_ID', $temp['id'], PDO::PARAM_INT);
         $stmt->bindParam(':P_DS_DESC', $temp['ds_desc']);
         $stmt->bindParam(':P_VELOCITY_ID', $temp['velocity']);
         $stmt->bindParam(':P_FORMATTYPE_ID', $temp['format']);
         $stmt->bindParam(':P_FREQ', $temp['frequency']);
         $stmt->bindParam(':P_USERMAIL', $mail);
         $stmt->execute();               
-        
-       
         return $request;
     }
 

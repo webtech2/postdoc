@@ -24,7 +24,7 @@
                             <div class="col-md-6">
                                 <select id="type" class="type-select form-control @error('type') is-invalid @enderror" name="type" value="{{ old('type') }}" required autocomplete="type" autofocus>
                                     @foreach ($types as $type)
-                                    <option value="{{ $type->tp_id }}">{{ $type->tp_type}}</option>
+                                    <option value="{{ $type->tp_id }}" {{ (old('type') == $type->tp_id ? "selected":"") }}>{{ $type->tp_type}}</option>
                                     @endforeach
                                 </select>
 
@@ -39,10 +39,10 @@
                             <label for="format" class="col-md-4 col-form-label text-md-right">Format type</label>
    
                             <div class="col-md-6">
-                                <select id="format" class="sub-type-select form-control @error('type') is-invalid @enderror" name="format" value="{{ old('format') }}" required autocomplete="format">
+                                <select id="format" class="sub-type-select form-control @error('format') is-invalid @enderror" name="format" required autocomplete="format">
                                     @foreach ($types as $type)
                                     @foreach ($type->subTypes as $stype)
-                                    <option value="{{ $stype->tp_id}}" class="@if ($type->tp_id!=$types[0]->tp_id) d-none @endif" parent-type="{{ $type->tp_id }}">{{ $stype->tp_type}}</option>
+                                    <option value="{{ $stype->tp_id}}" {{ (old('format') == $stype->tp_id ? "selected":"") }} class="@if (old('type', $types[0]->tp_id)!=$type->tp_id) d-none @endif" parent-type="{{ $type->tp_id }}">{{ $stype->tp_type}}</option>
                                     @endforeach
                                     @endforeach
                                 </select>
@@ -95,18 +95,24 @@
                                         <strong>{{ $message }}</strong>
                                     </span>
                                 @enderror
-                                <input id="table" type="hidden" name="table" value="{{ old('table') }}" required>                                
+                                <input id="table" type="hidden" class="form-control @error('table') is-invalid @enderror" name="table" value="{{ old('table') }}" required>                                
                                 @error('table')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
                                 @enderror
-                                <input id="owner" type="hidden" name="owner" value="{{ old('owner') }}" required>                                
+                                <input id="owner" type="hidden" class="form-control @error('owner') is-invalid @enderror" name="owner" value="{{ old('owner') }}" required>                                
                                 @error('owner')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
                                 @enderror                              
+                                <input id="cnt" type="hidden" class="form-control @error('cnt') is-invalid @enderror" name="cnt" value="{{ old('cnt') }}" required>                                
+                                @error('cnt')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
                             </div>
                         </div>
                         <div class="form-group row">
@@ -122,6 +128,19 @@
                                 @enderror
                             </div>
                         </div>
+<!--                        <div class="form-group row">
+                            <label for="ds_file" class="col-md-4 col-form-label text-md-right">Example file</label>
+
+                            <div class="col-md-6">
+                                <input id="ds_file" type="file" class="form-control @error('ds_file') is-invalid @enderror" name="ds_file" value="{{ old('ds_file') }}" autocomplete="ds_file">
+
+                                @error('ds_file')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>                        -->
                         <div class="form-group row mb-0">
                             <div class="col-md-6 offset-md-4">
                                 <button type="submit" class="btn btn-primary">

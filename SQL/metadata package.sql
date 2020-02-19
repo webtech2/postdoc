@@ -28,13 +28,17 @@ create or replace PACKAGE POSTDOC_METADATA AS
         p_velocity_id in varchar2 default null,
         p_role_id in varchar2 default null,
         p_formattype_id in varchar2 default null,
-        p_freq in varchar2 default null        
+        p_freq in varchar2 default null,
+        p_usermail in varchar2 default null         
     );
 
   procedure compare_table_structure (
         p_table_name in varchar2,
         p_ds_id in number default null
     );
+
+  function is_xml_uploaded (p_spec in varchar2) return number;  
+
 END POSTDOC_METADATA;
 /
 
@@ -159,6 +163,7 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
     v_username varchar2(100);
   begin
     select au_id into v_au_id from author join user_tab on au_user_id=us_id where us_email=p_usermail;
+    return v_au_id;
   exception when no_data_found then
     select us_id, us_name into v_us_id, v_username from user_tab where us_email = p_usermail;
     insert into author values (AUTHOR_AU_ID_SEQ.nextval, v_username, v_us_id);
@@ -288,7 +293,6 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
             property_value_change(v_meta.md_id, v_meta.md_value, p_tab_col.DATA_SCALE, c_meta_prop(1));
           end if;
         when c_meta_prop(5) then 
-          insert into error_log values (sysdate, v_meta.md_id||'; '||p_tab_col.NULLABLE||'; '||v_meta.md_value);
           if p_tab_col.NULLABLE<>v_meta.md_value then -- change in metadata property value
             property_value_change(v_meta.md_id, v_meta.md_value, p_tab_col.NULLABLE, c_meta_prop(1));
           end if;
@@ -310,9 +314,9 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
         for v_tab_col in (select * from all_tab_columns where owner=v_owner and table_name = v_table) loop
             compare_column_metadata(v_tab_col, p_ds_id);
         end loop;
+        -- compare constraints
     end if;
-  end compare_table_structure;
-        
+  end compare_table_structure;        
   
   procedure insert_xml_children_metadata (p_spec varchar2, p_item luadm.xml_nodes%rowtype, p_ds_id in number, p_parent_di_id in number) as
     v_di_id number(10);
@@ -347,19 +351,27 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
         p_velocity_id in varchar2 default null,
         p_role_id in varchar2 default null,
         p_formattype_id in varchar2 default null,
-        p_freq in varchar2 default null        
+        p_freq in varchar2 default null,
+        p_usermail in varchar2 default null        
     ) AS
     v_ds_id number(10):=p_ds_id;
   begin
     if p_ds_id is not null or (p_hl_id is not null or p_so_id is not null) and p_velocity_id is not null and p_formattype_id is not null then
         if p_ds_id is null then -- no existing data set, must create one
-            v_ds_id:=insert_dataset(p_spec, p_ds_desc, p_so_id, p_hl_id, p_velocity_id, p_role_id, p_formattype_id, p_freq);
+            v_ds_id:=insert_dataset(p_spec, p_ds_desc, p_so_id, p_hl_id, p_velocity_id, p_role_id, p_formattype_id, p_freq, p_usermail);
         end if;
         for v_item in (select * from luadm.xml_nodes where spec like '%'||p_spec and prev is null) loop
           insert_xml_children_metadata(p_spec, v_item, v_ds_id, null);
         end loop;
     end if;
   end gather_xml_metadata;
+  
+  function is_xml_uploaded (p_spec in varchar2) return number as
+    v_cnt number(1);
+  begin
+    select count(*) into v_cnt from luadm.xml_nodes where spec like '0 '||p_spec and rownum=1;
+    return v_cnt;
+  end is_xml_uploaded;
 
 END POSTDOC_METADATA;
 /

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Type;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -34,7 +35,15 @@ class StoreDataSet extends FormRequest
                         'table' => Str::after($this['ds_name'],'.'),
                     ]
                 );
-            }     
+            }                 
+        } elseif ($this['format'] == Type::where('tp_type','XML')->first()->tp_id) {
+            $cnt = DB::table('dual') -> select(DB::raw("postdoc_metadata.is_xml_uploaded('" . $this['ds_name'] . "') as cnt"))->first()->cnt;
+            return array_merge(
+                $this->all(),
+                [
+                    'cnt' => $cnt,
+                ]
+            );
         }
         return $this->all();
     }    
@@ -83,6 +92,48 @@ class StoreDataSet extends FormRequest
                     Rule::exists('all_tables','table_name')->where(function ($query) use ($owner) {
                         return $query->where('owner', $owner);
                     }),                            
+                ],
+                'ds_name' => [
+                    'required',
+                    'min:1',
+                    'max:71',
+                    Rule::unique('dataset','ds_name')->where(function ($query) use ($objcolumn,$id) {
+                        return $query->where($objcolumn, $id)->whereNull('ds_deleted');
+                    }),
+                ],  
+            ];
+        } 
+        elseif ($this['format'] == Type::where('tp_type','XML')->first()->tp_id) { 
+            $objcolumn='ds_'.$this['object'].'_id';
+            $id = $this['id'];     
+            return [
+                'object'  => [
+                    'required'
+                ],
+                'id'  => [
+                    'required'
+                ],
+                'type'  => [
+                    'required',
+                    'size:10',
+                    'exists:types,tp_id'
+                ],
+                'format'  => [
+                    'required',
+                    'size:10',
+                    'exists:types,tp_id'
+                ],
+                'velocity'  => [
+                    'required',
+                    'size:10',
+                    'exists:types,tp_id'
+                ],                
+                'frequency' => [
+                    'required'
+                ],                
+                'cnt' => [
+                    'required',
+                    'gte:1',                            
                 ],
                 'ds_name' => [
                     'required',
