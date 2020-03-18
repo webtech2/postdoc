@@ -42,6 +42,8 @@ create or replace PACKAGE POSTDOC_METADATA AS
 END POSTDOC_METADATA;
 /
 
+
+create or replace PACKAGE BODY POSTDOC_METADATA AS
 create or replace PACKAGE BODY POSTDOC_METADATA AS
 
   TYPE t_cons_cols IS TABLE OF all_cons_columns%rowtype index by binary_integer;
@@ -336,7 +338,7 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
         insert into relationshipelement values (v_di_id, v_rl_id);
       end if;
       if v_itemtype=c_type_xmlelem then
-        for v_child in (select * from luadm.xml_nodes where spec like '%'||p_spec and prev=p_item.id) loop
+        for v_child in (select * from luadm.xml_nodes where lower(spec) like '%'||lower(p_spec) and prev=p_item.id) loop
           insert_xml_children_metadata(p_spec, v_child, p_ds_id, v_di_id);
         end loop;
       end if;
@@ -360,7 +362,7 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
         if p_ds_id is null then -- no existing data set, must create one
             v_ds_id:=insert_dataset(p_spec, p_ds_desc, p_so_id, p_hl_id, p_velocity_id, p_role_id, p_formattype_id, p_freq, p_usermail);
         end if;
-        for v_item in (select * from luadm.xml_nodes where spec like '%'||p_spec and prev is null) loop
+        for v_item in (select * from luadm.xml_nodes where lower(spec) like '%'||lower(p_spec) and prev is null) loop
           insert_xml_children_metadata(p_spec, v_item, v_ds_id, null);
         end loop;
     end if;
@@ -369,7 +371,7 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
   function is_xml_uploaded (p_spec in varchar2) return number as
     v_cnt number(1);
   begin
-    select count(*) into v_cnt from luadm.xml_nodes where spec like '0 '||p_spec and rownum=1;
+    select count(*) into v_cnt from luadm.xml_nodes where lower(spec) like '0 '||lower(p_spec) and rownum=1;
     return v_cnt;
   end is_xml_uploaded;
 

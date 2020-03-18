@@ -20,7 +20,7 @@
                 <div class="card">
                 <div data-toggle="collapse" data-target=".set" class="card-header font-weight-bold">Data Sets | 
                     <a href="{{action('DataSetController@create', ['object' => 'datahighwaylevel', 'id' => $dhlevel->hl_id])}}">Create new<a></div>
-                @if ($dhlevel->dataSets()->count()>0)
+                @if ($dhlevel->dataSets()->whereNull('ds_deleted')->count()>0)
                 <div class="card-text">
                     <table class="table table-hover">
                         <thead>
@@ -34,7 +34,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @each ('partials.dataset', $dhlevel->dataSets, 'dset' )
+                            @each ('partials.dataset', $dhlevel->dataSets()->whereNull('ds_deleted')->get(), 'dset' )
                         </tbody>
                     </table>
                 </div>

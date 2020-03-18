@@ -164,6 +164,29 @@ class DataHighwayController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $dhlevel = DataHighwayLevel::find($id);
+        $dhlevel->hl_deleted = Carbon::now();       
+        $dhlevel->save();      
+
+        $user = Auth::user();
+        $author = $user->author;
+        if (!$author) {
+            $author = new Author();
+            $author->au_id = DB::select('select AUTHOR_AU_ID_SEQ.nextval as au_id from dual')[0]->au_id; 
+            $author->au_username = $user->us_name;
+            $author->user()->associate($user);
+            $author->save();
+        }
+
+        $change = new Change();
+        $change->ch_id = DB::select('select CHANGE_CH_ID_SEQ.nextval as ch_id from dual')[0]->ch_id; 
+        $change->ch_changetype_id = DB::select("select tp_id from types where tp_type='Deletion'")[0]->tp_id;
+        $change->ch_statustype_id = DB::select("select tp_id from types where tp_type='New'")[0]->tp_id;
+        $change->dataHighwayLevel()->associate($dhlevel);
+        $change->author()->associate($author);
+        $change->ch_datetime = Carbon::now();
+        $change->save();
+        return redirect()->action('HomeController@index')->withSuccess('Data highway level deleted!');;;
+        
     }
 }

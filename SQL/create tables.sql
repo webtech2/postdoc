@@ -51,6 +51,8 @@ CREATE TABLE dataitem (
 );
 
 ALTER TABLE dataitem ADD CONSTRAINT dataitem_pk PRIMARY KEY ( di_id );
+alter table dataitem add     di_deleted       DATE;
+alter table dataitem add     di_created       DATE;
 
 CREATE TABLE dataset (
     ds_id                    NUMBER(10) NOT NULL,

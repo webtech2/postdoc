@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Author;
+use App\Change;
 use App\DataHighwayLevel;
 use App\DataSet;
 use App\DataSource;
 use App\Http\Requests\StoreDataSet;
 use App\Type;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use PDO;
+use function redirect;
 use function view;
 
 class DataSetController extends Controller
@@ -61,7 +65,8 @@ class DataSetController extends Controller
         }
         $types = Type::where('tp_parenttype_id','DST0000000')->where('tp_id','<>','FMT0000000')->get();
         $velocities = Type::where('tp_parenttype_id','VLT0000000')->get();
-        return view('datasets.create', compact('object', 'id', 'coll', 'types', 'velocities'));
+        $roles = Type::where('tp_parenttype_id','DSR0000000')->get();
+        return view('datasets.create', compact('object', 'id', 'coll', 'types', 'velocities', 'roles'));
     }
 
     /**
@@ -79,12 +84,12 @@ class DataSetController extends Controller
             case Type::where('tp_type','Relational')->first()->tp_id: // relational
                 if ($temp['object'] == 'datahighwaylevel') {
                     $stmt = $pdo->prepare("begin POSTDOC_METADATA.GATHER_TABLE_METADATA(P_TABLE_NAME=>:P_TABLE_NAME, P_HL_ID=>:P_HL_ID, P_DS_DESC=>:P_DS_DESC, "
-                            . "P_VELOCITY_ID=>:P_VELOCITY_ID, P_FORMATTYPE_ID=>:P_FORMATTYPE_ID, P_FREQ=>:P_FREQ, P_USERMAIL=>:P_USERMAIL); end;");
+                            . "P_VELOCITY_ID=>:P_VELOCITY_ID, P_FORMATTYPE_ID=>:P_FORMATTYPE_ID, P_FREQ=>:P_FREQ, P_USERMAIL=>:P_USERMAIL, P_ROLE_ID=>:P_ROLE_ID); end;");
                     $stmt->bindParam(':P_HL_ID', $temp['id'], PDO::PARAM_INT);
 
                 } else {
                     $stmt = $pdo->prepare("begin POSTDOC_METADATA.GATHER_TABLE_METADATA(P_TABLE_NAME=>:P_TABLE_NAME, P_SO_ID=>:P_SO_ID, P_DS_DESC=>:P_DS_DESC, "
-                            . "P_VELOCITY_ID=>:P_VELOCITY_ID, P_FORMATTYPE_ID=>:P_FORMATTYPE_ID, P_FREQ=>:P_FREQ, P_USERMAIL=>:P_USERMAIL); end;");            
+                            . "P_VELOCITY_ID=>:P_VELOCITY_ID, P_FORMATTYPE_ID=>:P_FORMATTYPE_ID, P_FREQ=>:P_FREQ, P_USERMAIL=>:P_USERMAIL, P_ROLE_ID=>:P_ROLE_ID); end;");            
                     $stmt->bindParam(':P_SO_ID', $temp['id'], PDO::PARAM_INT);
                 }
                 $stmt->bindParam(':P_TABLE_NAME', $temp['ds_name']);
@@ -109,6 +114,7 @@ class DataSetController extends Controller
         $stmt->bindParam(':P_FORMATTYPE_ID', $temp['format']);
         $stmt->bindParam(':P_FREQ', $temp['frequency']);
         $stmt->bindParam(':P_USERMAIL', $mail);
+        $stmt->bindParam(':P_ROLE_ID', $temp['role']);
         $stmt->execute();               
         return $request;
     }
@@ -156,6 +162,28 @@ class DataSetController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $dset = DataSet::find($id);
+        $dset->ds_deleted = Carbon::now();       
+        $dset->save();      
+
+        $user = Auth::user();
+        $author = $user->author;
+        if (!$author) {
+            $author = new Author();
+            $author->au_id = DB::select('select AUTHOR_AU_ID_SEQ.nextval as au_id from dual')[0]->au_id; 
+            $author->au_username = $user->us_name;
+            $author->user()->associate($user);
+            $author->save();
+        }
+
+        $change = new Change();
+        $change->ch_id = DB::select('select CHANGE_CH_ID_SEQ.nextval as ch_id from dual')[0]->ch_id; 
+        $change->ch_changetype_id = DB::select("select tp_id from types where tp_type='Deletion'")[0]->tp_id;
+        $change->ch_statustype_id = DB::select("select tp_id from types where tp_type='New'")[0]->tp_id;
+        $change->dataSet()->associate($dset);
+        $change->author()->associate($author);
+        $change->ch_datetime = Carbon::now();
+        $change->save();
+        return redirect()->action('HomeController@index')->withSuccess('Data set deleted!');;;
     }
 }

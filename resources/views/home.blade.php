@@ -43,6 +43,10 @@
                     </table>
                 </div>
             </div>
+            <div class="card">
+                <div data-toggle="collapse" data-target=".mapping" class="card-header font-weight-bold">Mappings | <a href="{{action('MappingController@create')}}">Create new<a></div>
+
+            </div>
 
             <div class="card">
             <div  data-toggle="collapse" data-target=".change" class="card-header font-weight-bold">Changes</div>

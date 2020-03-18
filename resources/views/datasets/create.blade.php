@@ -39,7 +39,7 @@
                             <label for="format" class="col-md-4 col-form-label text-md-right">Format type</label>
    
                             <div class="col-md-6">
-                                <select id="format" class="sub-type-select form-control @error('format') is-invalid @enderror" name="format" required autocomplete="format">
+                                <select id="format" data-parent="type" class="sub-type-select form-control @error('format') is-invalid @enderror" name="format" required autocomplete="format">
                                     @foreach ($types as $type)
                                     @foreach ($type->subTypes as $stype)
                                     <option value="{{ $stype->tp_id}}" {{ (old('format') == $stype->tp_id ? "selected":"") }} class="@if (old('type', $types[0]->tp_id)!=$type->tp_id) d-none @endif" parent-type="{{ $type->tp_id }}">{{ $stype->tp_type}}</option>
@@ -58,13 +58,31 @@
                             <label for="velocity" class="col-md-4 col-form-label text-md-right">Velocity</label>
    
                             <div class="col-md-6">
-                                <select id="velocity" class="form-control @error('type') is-invalid @enderror" name="velocity" value="{{ old('velocity') }}" required autocomplete="velocity" >
+                                <select id="velocity" class="form-control @error('velocity') is-invalid @enderror" name="velocity" value="{{ old('velocity') }}" required autocomplete="velocity" >
                                     @foreach ($velocities as $velocity)
                                     <option value="{{ $velocity->tp_id }}">{{ $velocity->tp_type}}</option>
                                     @endforeach
                                 </select>
 
                                 @error('velocity')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="role" class="col-md-4 col-form-label text-md-right">Role</label>
+
+                            <div class="col-md-6">
+                                <select id="role" class="form-control @error('role') is-invalid @enderror" name="role" value="{{ old('role') }}" autocomplete="role" >
+                                    <option value="">None</option>
+                                    @foreach ($roles as $role)
+                                    <option value="{{ $role->tp_id }}">{{ $role->tp_type}}</option>
+                                    @endforeach
+                                </select>
+
+                                @error('role')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>

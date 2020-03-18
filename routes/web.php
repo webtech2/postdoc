@@ -34,3 +34,4 @@ Route::get('dhlproperty/{hlid}/create', 'PropertyController@createForDHlevel');
 Route::post('property/{object}/{id}', 'PropertyController@store');
 Route::resource('change', 'ChangeController');
 Route::resource('datahighwaylevel', 'DataHighwayController');
+Route::resource('mapping', 'MappingController');

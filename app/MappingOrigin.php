@@ -4,11 +4,13 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class MappingSource extends Model
+class MappingOrigin extends Model
 {
-    protected $table = 'mappingsource';
-    protected $primaryKey = 'ms_mapping_id';
-
+    protected $table = 'mappingorigin';
+    public $timestamps = false;
+    protected $primaryKey = null;
+    public $incrementing = false;
+    
     public function mapping()
     {
         return $this->belongsTo('App\Mapping', 'ms_mapping_id');

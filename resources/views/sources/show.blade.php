@@ -21,7 +21,7 @@
                 <div class="card">
                 <div data-toggle="collapse" data-target=".set" class="card-header font-weight-bold">Data Sets | 
                     <a href="{{action('DataSetController@create', ['object' => 'datasource', 'id' => $source->so_id])}}">Create new<a></div>
-                @if ($source->dataSets()->count()>0)
+                @if ($source->dataSets()->whereNull('ds_deleted')->count()>0)
                 <div class="card-text">
                     <table class="table table-hover">
                         <thead>
@@ -35,7 +35,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @each ('partials.dataset', $source->dataSets, 'dset' )
+                            @each ('partials.dataset', $source->dataSets()->whereNull('ds_deleted')->get(), 'dset' )
                         </tbody>
                     </table>
                 </div>

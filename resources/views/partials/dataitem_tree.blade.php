@@ -1,4 +1,4 @@
-<li>{{ $item->di_name }} : {{ $item->itemType->tp_type}}</li>
+<li>{{ $item->di_name }} : {{ $item->itemType->tp_type}} : {{ $item->di_id }}</li>
 	@if (count($item->relationships) > 0)
 	    <ul>
 	    @foreach($item->relationships as $rel)

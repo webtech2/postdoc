@@ -2,29 +2,6 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/C:/wamp64/www/postdoc/app/Change.php</file>
-            <file>file:/C:/wamp64/www/postdoc/resources/views/datahighwaylevels/create.blade.php</file>
-            <file>file:/C:/wamp64/www/postdoc/resources/views/changes/show.blade.php</file>
-            <file>file:/C:/wamp64/www/postdoc/resources/views/properties/edit.blade.php</file>
-            <file>file:/C:/wamp64/www/postdoc/routes/web.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/Http/Controllers/PropertyController.php</file>
-            <file>file:/C:/wamp64/www/postdoc/resources/views/datahighwaylevels/edit.blade.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/MetadataProperty.php</file>
-            <file>file:/C:/wamp64/www/postdoc/resources/views/sources/create.blade.php</file>
-            <file>file:/C:/wamp64/www/postdoc/resources/views/partials/property.blade.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/Http/Controllers/Controller.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/MetadataModelElement.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/DataSource.php</file>
-            <file>file:/C:/wamp64/www/postdoc/resources/views/partials/datahighwaylevel.blade.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/DataSet.php</file>
-            <file>file:/C:/wamp64/www/postdoc/resources/views/home.blade.php</file>
-            <file>file:/C:/wamp64/www/postdoc/resources/views/sources/show.blade.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/Http/Controllers/DataSetController.php</file>
-            <file>file:/C:/wamp64/www/postdoc/resources/views/datahighwaylevels/show.blade.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/Http/Controllers/DataHighwayController.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/DataItem.php</file>
-            <file>file:/C:/wamp64/www/postdoc/app/Http/Controllers/DataItemController.php</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>

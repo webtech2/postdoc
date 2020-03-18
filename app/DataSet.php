@@ -10,6 +10,7 @@ class DataSet extends MetadataModelElement
     protected $table = 'dataset';
     protected $primaryKey = 'ds_id';
     protected $changeColumn = 'ch_dataset_id';
+    public $timestamps = false;
     
     public function dataSource()
     {
