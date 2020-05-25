@@ -162,7 +162,6 @@ create or replace package body change_adaptation as
          values v_process;
 
     select count(1) into v_dummy from changeadaptationprocess;
-    dbms_output.put_line('--------INSERTED!!!!!!!!!!!   ' || v_dummy);
     return v_process.cap_id;
 
   end insert_change_adaptation_proc;
@@ -183,19 +182,29 @@ create or replace package body change_adaptation as
                                                 in_scenario_id in changeadaptationscenario.cas_id%type,
                                                 in_change_id   in change.ch_id%type)is
     v_manualconditionfulfillment ca_manualconditionfulfillment%rowtype;
+    v_conditions_inserted        number;
   begin
     for condition in (select distinct c.cacm_condition_id as condition_id
                         from ca_conditionmapping c
                        inner join changeadaptationcondition cac on cac.cac_id = c.cacm_condition_id
                        where c.cacm_scenario_id = in_scenario_id
                          and cac.cac_conditiontype_id = CONST_MANUAL_CONDITION) loop
-      v_manualconditionfulfillment := null;
-      v_manualconditionfulfillment.camcf_id := ca_manualconditionfulfill_SQ.nextval;
-      v_manualconditionfulfillment.camcf_condition_id := condition.condition_id;
-      v_manualconditionfulfillment.camcf_change_id := in_change_id;
-      v_manualconditionfulfillment.camcf_fulfillmentstatus_id := CONST_CONDITION_NOT_FULFILLED;
 
-      insert into ca_manualconditionfulfillment values v_manualconditionfulfillment;
+      select count(1) as cond_count
+        into v_conditions_inserted
+        from ca_manualconditionfulfillment mcf
+       where mcf.camcf_change_id = in_change_id
+         and mcf.camcf_condition_id = condition.condition_id;
+
+      if v_conditions_inserted = 0 then
+          v_manualconditionfulfillment := null;
+          v_manualconditionfulfillment.camcf_id := ca_manualconditionfulfill_SQ.nextval;
+          v_manualconditionfulfillment.camcf_condition_id := condition.condition_id;
+          v_manualconditionfulfillment.camcf_change_id := in_change_id;
+          v_manualconditionfulfillment.camcf_fulfillmentstatus_id := CONST_CONDITION_NOT_FULFILLED;
+
+          insert into ca_manualconditionfulfillment values v_manualconditionfulfillment;
+      end if;
     end loop;
   end insert_manual_condition_fulf;
 
