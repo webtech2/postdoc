@@ -385,6 +385,7 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
     v_ch_type types.tp_id%type;
     v_st_type types.tp_id%type;
     v_child_di_id dataitem.di_id%type;
+    v_new number(1):=0;
   begin 
     -- check if such data item with the parent and type is present 
     begin
@@ -431,7 +432,7 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
           commit;          
         end loop;        
       exception when no_data_found then
-        null;
+        v_new:=1;
       end;
     else
       begin
@@ -464,8 +465,16 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
           mark_children_deleted(v_child_di.re_child_dataItem_id);          
         end loop;
       exception when no_data_found then
-        null;
+        v_new:=1;
       end;
+    end if;
+    if v_new=1 then
+      v_di_id:=insert_xml_children_metadata(p_spec, p_item, p_ds_id, p_parent_di_id);
+      select tp_id into v_ch_type from types where tp_type='Addition';
+      select tp_id into v_st_type from types where tp_type='New';
+      insert into change (CH_ID, CH_CHANGETYPE_ID, CH_STATUSTYPE_ID, CH_DATAITEM_ID, CH_DATETIME) 
+              values (CHANGE_CH_ID_SEQ.nextval, v_ch_type, v_st_type, v_di_id, sysdate);        
+      commit;       
     end if;
     end;
   end;
