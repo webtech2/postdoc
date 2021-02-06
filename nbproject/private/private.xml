@@ -2,6 +2,16 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/C:/wamp64/www/postdoc/app/Change.php</file>
+            <file>file:/C:/wamp64/www/postdoc/app/CaConditionMapping.php</file>
+            <file>file:/C:/wamp64/www/postdoc/app/CaManualConditionFulfillment.php</file>
+            <file>file:/C:/wamp64/www/postdoc/app/ChangeAdaptationCondition.php</file>
+            <file>file:/C:/wamp64/www/postdoc/app/ChangeAdaptationOperation.php</file>
+            <file>file:/C:/wamp64/www/postdoc/app/ChangeAdaptationScenario.php</file>
+            <file>file:/C:/wamp64/www/postdoc/app/Http/Controllers/DataSetController.php</file>
+            <file>file:/C:/wamp64/www/postdoc/app/ChangeAdaptationProcess.php</file>
+            <file>file:/C:/wamp64/www/postdoc/app/ChangeAdaptationAdditionalData.php</file>
+        </group>
     </open-files>
 </project-private>

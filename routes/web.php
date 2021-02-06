@@ -35,3 +35,4 @@ Route::post('property/{object}/{id}', 'PropertyController@store');
 Route::resource('change', 'ChangeController');
 Route::resource('datahighwaylevel', 'DataHighwayController');
 Route::resource('mapping', 'MappingController');
+Route::get('mapping/{id}/create', 'MappingController@createForDataItem');

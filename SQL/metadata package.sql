@@ -44,7 +44,6 @@ END POSTDOC_METADATA;
 
 
 create or replace PACKAGE BODY POSTDOC_METADATA AS
-create or replace PACKAGE BODY POSTDOC_METADATA AS
 
   TYPE t_cons_cols IS TABLE OF all_cons_columns%rowtype index by binary_integer;
   TYPE t_meta_prop IS varray(5) of varchar2(100);
@@ -320,8 +319,9 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
     end if;
   end compare_table_structure;        
   
-  procedure insert_xml_children_metadata (p_spec varchar2, p_item luadm.xml_nodes%rowtype, p_ds_id in number, p_parent_di_id in number) as
+  function insert_xml_children_metadata (p_spec varchar2, p_item luadm.xml_nodes%rowtype, p_ds_id in number, p_parent_di_id in number) return number as
     v_di_id number(10);
+    v_child_di_id number(10);
     v_itemtype varchar2(10);
     v_rl_id number(10);
     begin
@@ -339,9 +339,10 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
       end if;
       if v_itemtype=c_type_xmlelem then
         for v_child in (select * from luadm.xml_nodes where lower(spec) like '%'||lower(p_spec) and prev=p_item.id) loop
-          insert_xml_children_metadata(p_spec, v_child, p_ds_id, v_di_id);
+          v_child_di_id:=insert_xml_children_metadata(p_spec, v_child, p_ds_id, v_di_id);
         end loop;
       end if;
+      return v_di_id;
   end insert_xml_children_metadata;
 
   procedure gather_xml_metadata (
@@ -357,16 +358,129 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
         p_usermail in varchar2 default null        
     ) AS
     v_ds_id number(10):=p_ds_id;
+    v_di_id number(10);
   begin
     if p_ds_id is not null or (p_hl_id is not null or p_so_id is not null) and p_velocity_id is not null and p_formattype_id is not null then
         if p_ds_id is null then -- no existing data set, must create one
             v_ds_id:=insert_dataset(p_spec, p_ds_desc, p_so_id, p_hl_id, p_velocity_id, p_role_id, p_formattype_id, p_freq, p_usermail);
         end if;
         for v_item in (select * from luadm.xml_nodes where lower(spec) like '%'||lower(p_spec) and prev is null) loop
-          insert_xml_children_metadata(p_spec, v_item, v_ds_id, null);
+          v_di_id:=insert_xml_children_metadata(p_spec, v_item, v_ds_id, null);
         end loop;
     end if;
   end gather_xml_metadata;
+  
+  procedure mark_children_deleted(p_di_id in dataitem.di_id%type) as
+  begin
+    update dataitem set di_deleted=sysdate where di_id=p_di_id;
+    for v_child_di in (select re.re_child_dataItem_id 
+        from relationship r join relationshipElement re on re.re_relationship_id=r.rl_id 
+        where r.rl_parent_dataItem_ID=p_di_id and r.rl_relationshipType_id=c_type_relCom) loop
+      mark_children_deleted(v_child_di.re_child_dataItem_id);
+    end loop;
+  end mark_children_deleted;
+  
+  procedure compare_xml_children_metadata (p_spec varchar2, p_item xml_nodes_copy%rowtype, p_ds_id in number, p_parent_di_id in number) as
+    v_di_id dataitem.di_id%type;
+    v_ch_type types.tp_id%type;
+    v_st_type types.tp_id%type;
+    v_child_di_id dataitem.di_id%type;
+  begin 
+    -- check if such data item with the parent and type is present 
+    begin
+      select di_id into v_di_id from dataitem d where di_name=p_item.name and di_dataset_id=p_ds_id 
+        and di_itemtype_id=decode(p_item.typ,'e',c_type_xmlelem,c_type_xmlattr) 
+        and (p_parent_di_id is null 
+            and not exists (select 1 from relationshipelement re join relationship r on re.re_relationship_id=r.rl_id 
+                and re.re_child_dataItem_ID=d.di_id and r.rl_relationshipType_id=c_type_relCom and r.rl_deleted is null)
+          or p_parent_di_id is not null 
+            and exists (select 1 from relationshipelement re join relationship r on re.re_relationship_id=r.rl_id 
+                and re.re_child_dataItem_ID=d.di_id and r.rl_relationshipType_id=c_type_relCom and r.rl_deleted is null
+                and r.rl_parent_dataItem_id=p_parent_di_id));
+                
+      for v_child in (select * from xml_nodes_copy where lower(spec) like '%'||lower(p_spec) and prev=p_item.id) loop
+        compare_xml_children_metadata(p_spec, v_child, p_ds_id, v_di_id);
+      end loop;                      
+    exception when no_data_found then -- not present, something changed
+    -- check if type changed
+    if p_item.typ='e' then 
+      begin
+        select di_id into v_di_id from dataitem d where di_name=p_item.name and di_dataset_id=p_ds_id 
+          and di_itemtype_id=c_type_xmlattr
+          and (p_parent_di_id is null 
+              and not exists (select 1 from relationshipelement re join relationship r on re.re_relationship_id=r.rl_id 
+                  and re.re_child_dataItem_ID=d.di_id and r.rl_relationshipType_id=c_type_relCom and r.rl_deleted is null)
+            or p_parent_di_id is not null 
+              and exists (select 1 from relationshipelement re join relationship r on re.re_relationship_id=r.rl_id 
+                  and re.re_child_dataItem_ID=d.di_id and r.rl_relationshipType_id=c_type_relCom and r.rl_deleted is null
+                  and r.rl_parent_dataItem_id=p_parent_di_id));    
+        -- change of type from attribute to element
+        update dataitem set di_itemtype_id=c_type_xmlelem where di_id=v_di_id;
+        select tp_id into v_ch_type from types where tp_type='Metadata value update';
+        select tp_id into v_st_type from types where tp_type='New';
+        insert into change (CH_ID, CH_CHANGETYPE_ID, CH_STATUSTYPE_ID, CH_DATAITEM_ID, CH_DATETIME, CH_NEWATTRVALUE, CH_OLDATTRVALUE, CH_ATTRNAME) 
+                values (CHANGE_CH_ID_SEQ.nextval, v_ch_type, v_st_type, v_di_id, sysdate, c_type_xmlelem, c_type_xmlattr, 'DI_ITEMTYPE_ID');        
+        commit;
+        -- process children as new data items
+        for v_child in (select * from xml_nodes_copy where lower(spec) like '%'||lower(p_spec) and prev=p_item.id) loop
+          v_child_di_id:=insert_xml_children_metadata(p_spec, v_child, p_ds_id, v_di_id);
+          select tp_id into v_ch_type from types where tp_type='Addition';
+          select tp_id into v_st_type from types where tp_type='New';
+          insert into change (CH_ID, CH_CHANGETYPE_ID, CH_STATUSTYPE_ID, CH_DATAITEM_ID, CH_DATETIME) 
+                  values (CHANGE_CH_ID_SEQ.nextval, v_ch_type, v_st_type, v_child_di_id, sysdate);        
+          commit;          
+        end loop;        
+      exception when no_data_found then
+        null;
+      end;
+    else
+      begin
+        select di_id into v_di_id from dataitem d where di_name=p_item.name and di_dataset_id=p_ds_id 
+          and di_itemtype_id=c_type_xmlattr
+          and (p_parent_di_id is null 
+              and not exists (select 1 from relationshipelement re join relationship r on re.re_relationship_id=r.rl_id 
+                  and re.re_child_dataItem_ID=d.di_id and r.rl_relationshipType_id=c_type_relCom and r.rl_deleted is null)
+            or p_parent_di_id is not null 
+              and exists (select 1 from relationshipelement re join relationship r on re.re_relationship_id=r.rl_id 
+                  and re.re_child_dataItem_ID=d.di_id and r.rl_relationshipType_id=c_type_relCom and r.rl_deleted is null
+                  and r.rl_parent_dataItem_id=p_parent_di_id));    
+        -- change of type from element to attribute
+        update dataitem set di_itemtype_id=c_type_xmlelem where di_id=v_di_id;
+        select tp_id into v_ch_type from types where tp_type='Metadata value update';
+        select tp_id into v_st_type from types where tp_type='New';
+        insert into change (CH_ID, CH_CHANGETYPE_ID, CH_STATUSTYPE_ID, CH_DATAITEM_ID, CH_DATETIME, CH_NEWATTRVALUE, CH_OLDATTRVALUE, CH_ATTRNAME) 
+                values (CHANGE_CH_ID_SEQ.nextval, v_ch_type, v_st_type, v_di_id, sysdate, c_type_xmlattr, c_type_xmlelem, 'DI_ITEMTYPE_ID');        
+        commit;
+        -- process previously existing children as deleted
+        for v_child_di in (select re.re_child_dataItem_id 
+            from relationship r join relationshipElement re on re.re_relationship_id=r.rl_id 
+            where r.rl_parent_dataItem_ID=v_di_id and r.rl_relationshipType_id=c_type_relCom) loop
+          
+          select tp_id into v_ch_type from types where tp_type='Deletion';
+          select tp_id into v_st_type from types where tp_type='New';
+          insert into change (CH_ID, CH_CHANGETYPE_ID, CH_STATUSTYPE_ID, CH_DATAITEM_ID, CH_DATETIME) 
+                values (CHANGE_CH_ID_SEQ.nextval, v_ch_type, v_st_type, v_child_di.re_child_dataItem_id, sysdate);        
+          commit;
+          mark_children_deleted(v_child_di.re_child_dataItem_id);          
+        end loop;
+      exception when no_data_found then
+        null;
+      end;
+    end if;
+    end;
+  end;
+  
+  procedure compare_xml_metadata (
+        p_spec in varchar2,
+        p_ds_id in number default null,
+        p_usermail in varchar2 default null   
+    ) AS 
+  
+  begin
+     for v_item in (select * from xml_nodes_copy where lower(spec) like '%'||lower(p_spec) and prev is null) loop
+       compare_xml_children_metadata(p_spec, v_item, p_ds_id, null);
+     end loop;
+  end;
   
   function is_xml_uploaded (p_spec in varchar2) return number as
     v_cnt number(1);

@@ -26,5 +26,16 @@ class Mapping extends MetadataModelElement
         return $this->hasMany('App\MappingOrigin', 'ms_mapping_id');
     }      
  
+    public function buildOperation()
+    {
+        $origins = $this->mappingOrigin;
+        $result = $this->mp_operation;
+        foreach ($origins as $origin) {
+            $result = str_replace('?'.$origin->ms_order.'?', 
+                    (($origin->originDataItem->dataSet->dataSource) ? ($origin->originDataItem->dataSet->dataSource->so_name) : ($origin->originDataItem->dataSet->dataHighwayLevel->hl_name)) . "." . $origin->originDataItem->dataSet->ds_name.".".$origin->originDataItem->di_name, 
+                    $result);
+        }
+        return $result;
+    }      
 
 }

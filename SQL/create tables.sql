@@ -97,7 +97,9 @@ CREATE TABLE error_log (
 CREATE TABLE mapping (
     mp_id                   NUMBER(10) NOT NULL,
     mp_target_dataitem_id   NUMBER(10) NOT NULL,
-    mp_operation            VARCHAR2(4000) NOT NULL
+    mp_operation            VARCHAR2(4000) NOT NULL,
+    mp_created              DATE,
+    mp_deleted              DATE
 );
 
 ALTER TABLE mapping ADD CONSTRAINT mapping_pk PRIMARY KEY ( mp_id );
@@ -129,7 +131,9 @@ ALTER TABLE metadataproperty ADD CONSTRAINT metadataproperty_pk PRIMARY KEY ( md
 CREATE TABLE relationship (
     rl_id                    NUMBER(10) NOT NULL,
     rl_parent_dataitem_id    NUMBER(10) NOT NULL,
-    rl_relationshiptype_id   VARCHAR2(10) NOT NULL
+    rl_relationshiptype_id   VARCHAR2(10) NOT NULL,
+    rl_created               DATE,
+    rl_deleted               DATE
 );
 
 ALTER TABLE relationship ADD CONSTRAINT relationship_pk PRIMARY KEY ( rl_id );

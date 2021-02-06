@@ -13,10 +13,18 @@
                             <label for="dhlevel" class="col-md-4 col-form-label text-md-right">Target data highway level</label>
    
                             <div class="col-md-6">
-                                <select id="dhlevel" class="type-select form-control @error('dhlevel') is-invalid @enderror" name="dhlevel" value="{{ old('dhlevel') }}" required autocomplete="dhlevel" autofocus>
+                                <select id="dhlevel" class="type-select form-control @error('dhlevel') is-invalid @enderror" 
+                                        name="dhlevel" value="{{ old('dhlevel') }}" required autocomplete="dhlevel" autofocus 
+                                        @isset($item) disabled @endisset>
+                                    @empty($item)
                                     @foreach ($dhlevels as $dhlevel)
                                     <option value="{{ $dhlevel->hl_id }}" {{ (old('dhlevel') == $dhlevel->hl_id ? "selected":"") }}>{{ $dhlevel->hl_name}}</option>
                                     @endforeach
+                                    @endempty
+                                    
+                                    @isset($item)
+                                    <option value="{{ $item->dataSet->dataHighwayLevel->hl_id }}" >{{ $item->dataSet->dataHighwayLevel->hl_name}}</option>
+                                    @endisset
                                 </select>
 
                                 @error('dhlevel')
@@ -30,12 +38,20 @@
                             <label for="dataset" class="col-md-4 col-form-label text-md-right">Data set</label>
    
                             <div class="col-md-6">
-                                <select id="dataset" data-parent="dhlevel" class="type-select sub-type-select form-control @error('dataset') is-invalid @enderror" name="dataset" required autocomplete="dataset">
+                                <select id="dataset" data-parent="dhlevel" class="type-select sub-type-select form-control @error('dataset') is-invalid @enderror" 
+                                        name="dataset" required autocomplete="dataset" 
+                                        @isset($item) disabled @endisset>>
+                                    @empty($item)
                                     @foreach ($dhlevels as $dhlevel)
                                     @foreach ($dhlevel->dataSets()->whereNull('ds_deleted')->orderBy('ds_name')->get() as $dataset)
                                     <option value="{{ $dataset->ds_id}}" {{ (old('dataset') == $dataset->ds_id ? "selected":"") }} class="@if (old('dhlevel', $dhlevels[0]->hl_id)!=$dhlevel->hl_id) d-none @endif" parent-type="{{ $dhlevel->hl_id }}">{{ $dataset->ds_name}}</option>
                                     @endforeach
                                     @endforeach
+                                    @endempty
+                                    
+                                    @isset($item)
+                                    <option value="{{ $item->dataSet->ds_id}}">{{ $item->dataSet->ds_name}}</option>
+                                    @endisset
                                 </select>
 
                                 @error('dataset')
@@ -49,7 +65,10 @@
                             <label for="dataitem" class="col-md-4 col-form-label text-md-right">Data item</label>
    
                             <div class="col-md-6">
-                                <select id="dataitem" data-parent="dataset" class="sub-type-select form-control @error('dataitem') is-invalid @enderror" name="dataitem" required autocomplete="dataitem">
+                                <select id="dataitem" data-parent="dataset" class="sub-type-select form-control @error('dataitem') is-invalid @enderror" 
+                                        name="dataitem" required autocomplete="dataitem" 
+                                        @isset($item) disabled @endisset>
+                                    @empty($item)
                                     @foreach ($dhlevels as $dhlevel)
                                     @foreach ($dhlevel->dataSets()->whereNull('ds_deleted')->orderBy('ds_name')->get() as $dataset)
                                     @foreach ($dataset->dataItems()->whereNull('di_deleted')->orderBy('di_name')->get() as $dataitem)
@@ -57,6 +76,11 @@
                                     @endforeach
                                     @endforeach
                                     @endforeach
+                                    @endempty
+                                    
+                                    @isset($item)
+                                    <option value="{{ $item->di_id}}" >{{ $item->di_name}}</option>
+                                    @endisset
                                 </select>
 
                                 @error('dataitem')
@@ -66,8 +90,10 @@
                                 @enderror
                             </div>
                         </div>
-
-
+                        
+                        @isset($item)
+                        <input type="hidden" value="{{ $item->di_id}}" name="dataitem">
+                        @endisset                        
 
                         <div class="form-group row">
                             <label for="operation" class="col-md-4 col-form-label text-md-right">Operation</label>

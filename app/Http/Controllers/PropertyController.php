@@ -136,14 +136,7 @@ class PropertyController extends Controller
         ]);        
 
         $user = Auth::user();
-        $author = $user->author;
-        if (!$author) {
-            $author = new Author();
-            $author->au_id = DB::select('select AUTHOR_AU_ID_SEQ.nextval as au_id from dual')[0]->au_id; 
-            $author->au_username = $user->us_name;
-            $author->user()->associate($user);
-            $author->save();
-        }
+        $author = $user->getAuthor();
         
         $prop->md_name = $request['name'];
         $prop->md_value = $request['value'];

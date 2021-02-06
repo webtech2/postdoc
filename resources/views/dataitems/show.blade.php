@@ -20,6 +20,25 @@
                 <p class="card-text">Changed: {{ $item->lastChanged() }}</p>
                 </div>
                 <div class="card">
+                <div data-toggle="collapse" data-target=".prop" class="card-header font-weight-bold">Mappings | 
+                    <a href="{{action('MappingController@createForDataItem', ['id' => $item->di_id])}}">Create new<a></div>
+                @if ($item->mappings()->count()>0)
+                <div class="card-text">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr class="collapse show prop">
+                                <th scope="col">Operation</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @each ('partials.mapping',  $item->mappings()->whereNull('mp_deleted')->get(), 'mapping' )
+                        </tbody>
+                    </table>
+                </div>
+                @endif
+                </div> 
+                <div class="card">
                 <div data-toggle="collapse" data-target=".prop" class="card-header font-weight-bold">Properties | 
                     <a href="{{action('PropertyController@createForDataItem', ['id' => $item->di_id])}}">Create new<a></div>
                 @if ($item->metadataProperties()->count()>0)
@@ -33,7 +52,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @each ('partials.property',  $item->metadataProperties, 'prop' )
+                            @each ('partials.property',  $item->metadataProperties()->whereNull('md_deleted')->get(), 'prop' )
                         </tbody>
                     </table>
                 </div>

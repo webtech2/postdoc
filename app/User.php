@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Author;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -49,5 +50,18 @@ class User extends Authenticatable
     public function getPK() 
     {
         return $this->primaryKey;
+    }
+    
+    public function getAuthor()
+    {
+        $author = $this->author;
+        if (!$author) {
+            $author = new Author();
+            $author->au_id = DB::select('select AUTHOR_AU_ID_SEQ.nextval as au_id from dual')[0]->au_id; 
+            $author->au_username = $this->us_name;
+            $author->user()->associate($this);
+            $author->save();
+        }
+        return $author;
     }
 }
