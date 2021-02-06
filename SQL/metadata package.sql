@@ -33,8 +33,7 @@ create or replace PACKAGE POSTDOC_METADATA AS
     );
 
   procedure compare_table_structure (
-        p_table_name in varchar2,
-        p_ds_id in number default null
+        p_ds_id in number
     );
   
   function is_xml_uploaded (p_spec in varchar2) return number;  
@@ -60,18 +59,24 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
   function insert_column_metadata (v_tab_col in all_tab_columns%rowtype, v_ds_id number) return number AS
     v_di_id number(10);
     begin
-        insert into dataitem (di_name, di_dataset_id, di_itemtype_id) values (v_tab_col.column_name, v_ds_id, c_type_col);
+        insert into dataitem (di_name, di_dataset_id, di_itemtype_id, di_created) 
+          values (v_tab_col.column_name, v_ds_id, c_type_col, sysdate);
         select dataitem_di_id_seq.currval into v_di_id from dual;
         -- metadata properties
-        insert into metadataProperty (md_name, md_value, md_dataitem_id) values (c_meta_prop(1),v_tab_col.DATA_TYPE,v_di_id);
-        insert into metadataProperty (md_name, md_value, md_dataitem_id) values (c_meta_prop(2),v_tab_col.DATA_LENGTH,v_di_id);
+        insert into metadataProperty (md_name, md_value, md_dataitem_id, md_created) 
+          values (c_meta_prop(1),v_tab_col.DATA_TYPE,v_di_id, sysdate);
+        insert into metadataProperty (md_name, md_value, md_dataitem_id, md_created) 
+          values (c_meta_prop(2),v_tab_col.DATA_LENGTH,v_di_id, sysdate);
         if v_tab_col.data_precision is not null then
-            insert into metadataProperty (md_name, md_value, md_dataitem_id) values (c_meta_prop(3),v_tab_col.DATA_PRECISION,v_di_id);
+            insert into metadataProperty (md_name, md_value, md_dataitem_id, md_created) 
+              values (c_meta_prop(3),v_tab_col.DATA_PRECISION,v_di_id, sysdate);
         end if;
         if v_tab_col.data_scale is not null then
-            insert into metadataProperty (md_name, md_value, md_dataitem_id) values (c_meta_prop(4),v_tab_col.DATA_SCALE,v_di_id);
+            insert into metadataProperty (md_name, md_value, md_dataitem_id, md_created) 
+              values (c_meta_prop(4),v_tab_col.DATA_SCALE,v_di_id, sysdate);
         end if;
-        insert into metadataProperty (md_name, md_value, md_dataitem_id) values (c_meta_prop(5),v_tab_col.NULLABLE,v_di_id);
+        insert into metadataProperty (md_name, md_value, md_dataitem_id, md_created) 
+          values (c_meta_prop(5),v_tab_col.NULLABLE,v_di_id, sysdate);
         return v_di_id;
   end insert_column_metadata;
   
@@ -131,7 +136,7 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
     end if;
     if v_ds_id is not null and v_ds_id<>0 then
         if p_cons.constraint_type='C' and not regexp_like(upper(p_cons.search_condition_vc),'^"+[a-zA-Z0-9_]+" IS NOT NULL$') then -- check constraint excluding not null
-          insert into metadataProperty (md_name, md_value, md_dataset_id) values ('CHECK_CONSTRAINT',p_cons.search_condition_vc,v_ds_id);
+          insert into metadataProperty (md_name, md_value, md_dataset_id, md_created) values ('CHECK_CONSTRAINT',p_cons.search_condition_vc,v_ds_id, sysdate);
         elsif p_cons.constraint_type='R' then -- FK
           begin
           select * into v_ref_cons from ALL_CONSTRAINTS where constraint_name=p_cons.r_constraint_name and owner=p_cons.r_owner;
@@ -147,7 +152,8 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
                 where r.rl_parent_dataitem_id=v_ref_di_id and re.re_child_dataitem_id=v_di_id and r.rl_relationshiptype_id=c_type_relFK)
                 then 1 else 0 end into v_flag from dual;
               if v_flag=0 then
-                insert into relationship (rl_parent_dataitem_id, rl_relationshiptype_id) values (v_ref_di_id, c_type_relFK);
+                insert into relationship (rl_parent_dataitem_id, rl_relationshiptype_id, rl_created) 
+                  values (v_ref_di_id, c_type_relFK, sysdate);
                 select RELATIONSHIP_RL_ID_SEQ.currval into v_rl_id from dual;
                 insert into relationshipelement values (v_di_id, v_rl_id);
               end if;
@@ -306,22 +312,39 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
   end compare_column_metadata;
   
   procedure compare_table_structure (
-        p_table_name in varchar2,
-        p_ds_id in number default null
+        p_ds_id in number
         ) AS
 
-        v_owner varchar2(100):=substr(upper(p_table_name),1,instr(p_table_name,'.')-1);
-        v_table varchar2(100):=substr(upper(p_table_name),instr(p_table_name,'.')+1);
+        v_ch_type types.tp_id%type;
+        v_st_type types.tp_id%type;
+        v_owner varchar2(100);
+        v_table varchar2(100);
+        p_table_name varchar2(100);
   begin
     if p_ds_id is not null then
+        select ds_name into p_table_name from dataset where ds_id=p_ds_id;
+        v_owner:=substr(upper(p_table_name),1,instr(p_table_name,'.')-1);
+        v_table:=substr(upper(p_table_name),instr(p_table_name,'.')+1);
+        -- exist in table
         for v_tab_col in (select * from all_tab_columns where owner=v_owner and table_name = v_table) loop
             compare_column_metadata(v_tab_col, p_ds_id);
         end loop;
+        -- exist only in metadata
+        for v_meta_col in (select d.* from dataitem d join dataset on di_dataset_id=ds_id
+          where ds_name=upper(p_table_name) 
+          and not exists (select 1 from all_tab_columns where owner=v_owner and table_name = v_table and column_name=upper(di_name))) loop
+            select tp_id into v_ch_type from types where tp_type='Deletion';
+            select tp_id into v_st_type from types where tp_type='New';
+            insert into change (CH_ID, CH_CHANGETYPE_ID, CH_STATUSTYPE_ID, CH_DATAITEM_ID, CH_DATETIME) 
+                values (CHANGE_CH_ID_SEQ.nextval, v_ch_type, v_st_type, v_meta_col.di_id, sysdate);        
+            commit;
+        end loop;
+
         -- compare constraints
     end if;
   end compare_table_structure;        
   
-  function insert_xml_children_metadata (p_spec varchar2, p_item luadm.xml_nodes%rowtype, p_ds_id in number, p_parent_di_id in number) return number as
+  function insert_xml_children_metadata (p_spec varchar2, p_item xml_nodes_copy%rowtype, p_ds_id in number, p_parent_di_id in number) return number as
     v_di_id number(10);
     v_child_di_id number(10);
     v_itemtype varchar2(10);
@@ -332,15 +355,17 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
       else
         v_itemtype:=c_type_xmlattr;
       end if;
-      insert into dataitem (di_name, di_dataset_id, di_itemtype_id) values (p_item.name, p_ds_id, v_itemtype);
+      insert into dataitem (di_name, di_dataset_id, di_itemtype_id, di_created) 
+        values (p_item.name, p_ds_id, v_itemtype, sysdate);
       select dataitem_di_id_seq.currval into v_di_id from dual;
       if p_parent_di_id is not null then
-        insert into Relationship (rl_parent_dataitem_id, rl_relationshiptype_id) values (p_parent_di_id, c_type_relCom);
+        insert into Relationship (rl_parent_dataitem_id, rl_relationshiptype_id, rl_created) 
+          values (p_parent_di_id, c_type_relCom, sysdate);
         select RELATIONSHIP_RL_ID_SEQ.currval into v_rl_id from dual;
         insert into relationshipelement values (v_di_id, v_rl_id);
       end if;
       if v_itemtype=c_type_xmlelem then
-        for v_child in (select * from luadm.xml_nodes where lower(spec) like '%'||lower(p_spec) and prev=p_item.id) loop
+        for v_child in (select * from xml_nodes_copy where lower(spec) like '%'||lower(p_spec) and prev=p_item.id) loop
           v_child_di_id:=insert_xml_children_metadata(p_spec, v_child, p_ds_id, v_di_id);
         end loop;
       end if;
@@ -366,7 +391,7 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
         if p_ds_id is null then -- no existing data set, must create one
             v_ds_id:=insert_dataset(p_spec, p_ds_desc, p_so_id, p_hl_id, p_velocity_id, p_role_id, p_formattype_id, p_freq, p_usermail);
         end if;
-        for v_item in (select * from luadm.xml_nodes where lower(spec) like '%'||lower(p_spec) and prev is null) loop
+        for v_item in (select * from xml_nodes_copy where lower(spec) like '%'||lower(p_spec) and prev is null) loop
           v_di_id:=insert_xml_children_metadata(p_spec, v_item, v_ds_id, null);
         end loop;
     end if;
@@ -539,7 +564,7 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
   function is_xml_uploaded (p_spec in varchar2) return number as
     v_cnt number(1);
   begin
-    select count(*) into v_cnt from luadm.xml_nodes where lower(spec) like '0 '||lower(p_spec) and rownum=1;
+    select count(*) into v_cnt from xml_nodes_copy where lower(spec) like '0 '||lower(p_spec) and rownum=1;
     return v_cnt;
   end is_xml_uploaded;
 

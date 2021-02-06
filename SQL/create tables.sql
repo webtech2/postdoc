@@ -627,6 +627,124 @@ CREATE SEQUENCE relationship_rl_id_seq START WITH 1 NOCACHE ORDER;
 
 CREATE SEQUENCE user_tab_us_id_seq START WITH 1 NOCACHE ORDER;
 
+--------------------------------------------------------
+--  DDL for Trigger AUTHOR_AU_ID_TRG
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE TRIGGER AUTHOR_AU_ID_TRG BEFORE
+    INSERT ON author
+    FOR EACH ROW
+     WHEN ( new.au_id IS NULL ) BEGIN
+    :new.au_id := author_au_id_seq.nextval;
+END;
+
+/
+ALTER TRIGGER AUTHOR_AU_ID_TRG ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger CHANGE_CH_ID_TRG
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE TRIGGER CHANGE_CH_ID_TRG BEFORE
+    INSERT ON change
+    FOR EACH ROW
+     WHEN ( new.ch_id IS NULL ) BEGIN
+    :new.ch_id := change_ch_id_seq.nextval;
+END;
+
+/
+ALTER TRIGGER CHANGE_CH_ID_TRG ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger DATAHIGHWAYLEVEL_HL_ID_TRG
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE TRIGGER DATAHIGHWAYLEVEL_HL_ID_TRG BEFORE
+    INSERT ON datahighwaylevel
+    FOR EACH ROW
+     WHEN ( new.hl_id IS NULL ) BEGIN
+    :new.hl_id := datahighwaylevel_hl_id_seq.nextval;
+END;
+
+/
+ALTER TRIGGER DATAHIGHWAYLEVEL_HL_ID_TRG ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger DATAITEM_DI_ID_TRG
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE TRIGGER DATAITEM_DI_ID_TRG BEFORE
+    INSERT ON dataitem
+    FOR EACH ROW
+     WHEN ( new.di_id IS NULL ) BEGIN
+    :new.di_id := dataitem_di_id_seq.nextval;
+END;
+
+/
+ALTER TRIGGER DATAITEM_DI_ID_TRG ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger DATASET_DS_ID_TRG
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE TRIGGER DATASET_DS_ID_TRG BEFORE
+    INSERT ON dataset
+    FOR EACH ROW
+     WHEN ( new.ds_id IS NULL ) BEGIN
+    :new.ds_id := dataset_ds_id_seq.nextval;
+END;
+
+/
+ALTER TRIGGER DATASET_DS_ID_TRG ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger DATASOURCE_SO_ID_TRG
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE TRIGGER DATASOURCE_SO_ID_TRG BEFORE
+    INSERT ON datasource
+    FOR EACH ROW
+     WHEN ( new.so_id IS NULL ) BEGIN
+    :new.so_id := datasource_so_id_seq.nextval;
+END;
+
+/
+ALTER TRIGGER DATASOURCE_SO_ID_TRG ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger MAPPING_MP_ID_TRG
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE TRIGGER MAPPING_MP_ID_TRG BEFORE
+    INSERT ON mapping
+    FOR EACH ROW
+     WHEN ( new.mp_id IS NULL ) BEGIN
+    :new.mp_id := mapping_mp_id_seq.nextval;
+END;
+
+/
+ALTER TRIGGER MAPPING_MP_ID_TRG ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger METADATAPROPERTY_MD_ID_TRG
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE TRIGGER METADATAPROPERTY_MD_ID_TRG BEFORE
+    INSERT ON metadataproperty
+    FOR EACH ROW
+     WHEN ( new.md_id IS NULL ) BEGIN
+    :new.md_id := metadataproperty_md_id_seq.nextval;
+END;
+
+/
+ALTER TRIGGER METADATAPROPERTY_MD_ID_TRG ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger RELATIONSHIP_RL_ID_TRG
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE TRIGGER RELATIONSHIP_RL_ID_TRG BEFORE
+    INSERT ON relationship
+    FOR EACH ROW
+     WHEN ( new.rl_id IS NULL ) BEGIN
+    :new.rl_id := relationship_rl_id_seq.nextval;
+END;
+
+/
+ALTER TRIGGER RELATIONSHIP_RL_ID_TRG ENABLE;
+
 -- xml_nodes
 --------------------------------------------------------
 --  DDL for Table XML_NODES_COPY

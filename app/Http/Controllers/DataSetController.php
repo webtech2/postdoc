@@ -182,10 +182,16 @@ class DataSetController extends Controller
     
     public function compare($id)
     {
-        $dset = DataSet::find($id);
-        if ($dset->formatType->tp_type=='XML') {
+        $dset = DataSet::where('ds_id', $id)->first();
+        if ($dset->formatType->tp_type == 'XML') {
             $pdo = DB::getPdo();
             $stmt = $pdo->prepare("begin POSTDOC_METADATA.compare_xml_metadata(p_ds_id=>:p_ds_id); end;");
+            $stmt->bindParam(':p_ds_id', $id, PDO::PARAM_INT);
+            $stmt->execute();    
+            return redirect()->action('DataSetController@show', $id)->withSuccess('Data set refreshed!');
+        } else if ($dset->formatType->tp_type == 'Relational') {
+            $pdo = DB::getPdo();
+            $stmt = $pdo->prepare("begin POSTDOC_METADATA.compare_table_structure(p_ds_id=>:p_ds_id); end;");
             $stmt->bindParam(':p_ds_id', $id, PDO::PARAM_INT);
             $stmt->execute();    
             return redirect()->action('DataSetController@show', $id)->withSuccess('Data set refreshed!');
