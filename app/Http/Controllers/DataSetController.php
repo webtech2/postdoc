@@ -179,4 +179,16 @@ class DataSetController extends Controller
         $change->save();
         return redirect()->action('HomeController@index')->withSuccess('Data set deleted!');
     }
+    
+    public function compare($id)
+    {
+        $dset = DataSet::find($id);
+        if ($dset->formatType->tp_type=='XML') {
+            $pdo = DB::getPdo();
+            $stmt = $pdo->prepare("begin POSTDOC_METADATA.compare_xml_metadata(p_ds_id=>:p_ds_id); end;");
+            $stmt->bindParam(':p_ds_id', $id, PDO::PARAM_INT);
+            $stmt->execute();    
+            return redirect()->action('DataSetController@show', $id)->withSuccess('Data set refreshed!');
+        }
+    }
 }

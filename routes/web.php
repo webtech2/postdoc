@@ -36,3 +36,4 @@ Route::resource('change', 'ChangeController');
 Route::resource('datahighwaylevel', 'DataHighwayController');
 Route::resource('mapping', 'MappingController');
 Route::get('mapping/{id}/create', 'MappingController@createForDataItem');
+Route::get('dataset/compare/{id}', 'DataSetController@compare');

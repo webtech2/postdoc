@@ -29,16 +29,18 @@ create or replace PACKAGE POSTDOC_METADATA AS
         p_role_id in varchar2 default null,
         p_formattype_id in varchar2 default null,
         p_freq in varchar2 default null,
-        p_usermail in varchar2 default null         
+        p_usermail in varchar2 default null        
     );
 
   procedure compare_table_structure (
         p_table_name in varchar2,
         p_ds_id in number default null
     );
-
+  
   function is_xml_uploaded (p_spec in varchar2) return number;  
-
+   
+  procedure compare_xml_metadata (p_ds_id in number);
+   
 END POSTDOC_METADATA;
 /
 
@@ -398,10 +400,24 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
             and exists (select 1 from relationshipelement re join relationship r on re.re_relationship_id=r.rl_id 
                 and re.re_child_dataItem_ID=d.di_id and r.rl_relationshipType_id=c_type_relCom and r.rl_deleted is null
                 and r.rl_parent_dataItem_id=p_parent_di_id));
-                
+      -- if item exists, compare its children          
       for v_child in (select * from xml_nodes_copy where lower(spec) like '%'||lower(p_spec) and prev=p_item.id) loop
         compare_xml_children_metadata(p_spec, v_child, p_ds_id, v_di_id);
-      end loop;                      
+      end loop;
+      -- select all children that are present in metadata, but are absent in xml structure
+      for v_abs_child in (select re.* from relationship join relationshipElement re
+        on rl_id=re_relationship_id join dataitem on re_child_dataItem_ID=di_id 
+        where rl_parent_dataItem_id=v_di_id 
+        and not exists (select 1 from xml_nodes_copy where lower(spec) like '%'||lower(p_spec) and prev=p_item.id and lower(name)=lower(di_name))) loop
+        -- create change - deletion
+        select tp_id into v_ch_type from types where tp_type='Deletion';
+        select tp_id into v_st_type from types where tp_type='New';
+        insert into change (CH_ID, CH_CHANGETYPE_ID, CH_STATUSTYPE_ID, CH_DATAITEM_ID, CH_DATETIME) 
+            values (CHANGE_CH_ID_SEQ.nextval, v_ch_type, v_st_type, v_abs_child.re_child_dataItem_id, sysdate);        
+        commit;
+        mark_children_deleted(v_abs_child.re_child_dataItem_id);           
+      end loop;
+      
     exception when no_data_found then -- not present, something changed
     -- check if type changed
     if p_item.typ='e' then 
@@ -468,6 +484,7 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
         v_new:=1;
       end;
     end if;
+    -- new data item
     if v_new=1 then
       v_di_id:=insert_xml_children_metadata(p_spec, p_item, p_ds_id, p_parent_di_id);
       select tp_id into v_ch_type from types where tp_type='Addition';
@@ -479,18 +496,46 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
     end;
   end;
   
-  procedure compare_xml_metadata (
-        p_spec in varchar2,
-        p_ds_id in number default null,
-        p_usermail in varchar2 default null   
-    ) AS 
-  
+  procedure compare_metadata_with_xml(
+       p_ds_id dataset.ds_id%type,
+       p_di dataitem%rowtype
+  ) as
+    v_parent_di_id dataitem.di_id%type;
   begin
-     for v_item in (select * from xml_nodes_copy where lower(spec) like '%'||lower(p_spec) and prev is null) loop
-       compare_xml_children_metadata(p_spec, v_item, p_ds_id, null);
-     end loop;
-  end;
+    begin 
+      select rl_parent_dataItem_id into v_parent_di_id 
+        from relationship join relationshipElement on re_relationship_id=rl_id
+        where re_child_dataitem_id=p_di.di_id;
+    exception when no_data_found then
+      v_parent_di_id:=null;
+    end;
+    
+    null;
+  end compare_metadata_with_xml;
   
+  procedure compare_xml_metadata (
+        p_ds_id in number   
+    ) AS 
+    v_item xml_nodes_copy%rowtype;
+    v_ds_name dataset.ds_name%type;
+  begin
+    select ds_name into v_ds_name from dataset where ds_id=p_ds_id;
+    if v_ds_name is not null then
+      for v_item in (select * from xml_nodes_copy where lower(spec) like '%'||lower(v_ds_name) and prev is null) loop
+        compare_xml_children_metadata(v_ds_name, v_item, p_ds_id, null);
+      end loop;
+    end if;
+    /*if p_ds_id is not null then
+      for v_di in (select * from dataitem where di_dataset_id=p_ds_id 
+        and not exists (select 1 from relationshipelement where re_child_dataitem_id = di_id)
+        order by di_id) loop
+        begin
+          select * into v_item from xml_nodes_copy where lower(spec) like '%'||lower(v_ds_name)
+        compare_metadata_with_xml(p_ds_id, v_di);
+      end loop;
+    end if;*/
+  end compare_xml_metadata;
+   
   function is_xml_uploaded (p_spec in varchar2) return number as
     v_cnt number(1);
   begin

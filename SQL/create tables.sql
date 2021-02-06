@@ -627,3 +627,15 @@ CREATE SEQUENCE relationship_rl_id_seq START WITH 1 NOCACHE ORDER;
 
 CREATE SEQUENCE user_tab_us_id_seq START WITH 1 NOCACHE ORDER;
 
+-- xml_nodes
+--------------------------------------------------------
+--  DDL for Table XML_NODES_COPY
+--------------------------------------------------------
+
+  CREATE TABLE "XML_NODES_COPY" 
+   (	"ID" NUMBER(8,0), 
+	"PREV" NUMBER(8,0), 
+	"NAME" VARCHAR2(50 BYTE), 
+	"TYP" VARCHAR2(1 BYTE), 
+	"SPEC" VARCHAR2(20 BYTE)
+   ) ;

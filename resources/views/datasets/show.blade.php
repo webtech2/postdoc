@@ -10,7 +10,7 @@
             </div>
             @endif
             <div class="card">
-                <div class="card-header"><h4>{{ $dset->ds_name }}</h4></div>
+                <div class="card-header"><h4>Data Set {{ $dset->ds_name }}</h4><a class="btn btn-success float-right" href="{{ action('DataSetController@compare', $dset->ds_id) }}">Refresh metadata</a> </div>
                 <div class="card-body">
                 <p class="card-text">{{ $dset->ds_description }}</p>
                 @if ($dset->dataSource) 
