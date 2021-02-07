@@ -22,13 +22,22 @@ insert into types values ('CHT0000012', 'Data item addition', 'CHT0000001');
 insert into types values ('CHT0000013', 'Data highway level addition', 'CHT0000001');
 insert into types values ('CHT0000014', 'Data set addition', 'CHT0000001');
 insert into types values ('CHT0000015', 'Data source addition', 'CHT0000001');
+insert into types values ('CHT0000016', 'Relationship addition', 'CHT0000001');
+insert into types values ('CHT0000017', 'Mapping addition', 'CHT0000001');
 
 insert into types values ('CHT0000021', 'Metadata property deletion', 'CHT0000002');
 insert into types values ('CHT0000022', 'Data item deletion', 'CHT0000002');
 insert into types values ('CHT0000023', 'Data highway level deletion', 'CHT0000002');
 insert into types values ('CHT0000024', 'Data set deletion', 'CHT0000002');
+insert into types values ('CHT0000025', 'Data source deletion', 'CHT0000002');
+insert into types values ('CHT0000026', 'Relationship deletion', 'CHT0000002');
+insert into types values ('CHT0000027', 'Mapping deletion', 'CHT0000002');
 
 insert into types values ('CHT0000031', 'Metadata value update', 'CHT0000003');
+insert into types values ('CHT0000032', 'Change of data set format', 'CHT0000003');
+insert into types values ('CHT0000033', 'Data set renaming', 'CHT0000003');
+insert into types values ('CHT0000034', 'Data item renaming', 'CHT0000003');
+insert into types values ('CHT0000035', 'Change of data item type', 'CHT0000003');
 
 INSERT INTO types VALUES (
     'CAP0000000',
@@ -128,5 +137,22 @@ INSERT INTO types VALUES (
     'MCF0000000'
 );
 
+INSERT INTO types VALUES (
+    'CIP0000000',
+    'Change adaptation process status',
+    NULL
+);
 
+INSERT INTO types VALUES (
+    'CIP0000001',
+    'Not adapted',
+    'CIP0000000'
+);
 
+INSERT INTO types VALUES (
+    'CIP0000002',
+    'Adapted',
+    'CIP0000000'
+);
+
+Insert into AUTHOR (AU_ID,AU_USERNAME,AU_USER_ID) values (1,'System',null);

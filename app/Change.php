@@ -3,6 +3,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use App\Type;
 
 class Change extends Model
 {
@@ -108,5 +110,28 @@ class Change extends Model
         return $this->primaryKey;
     }
 
+    public function getChangeType() 
+    {
+        $ch_typ = DB::select('select POSTDOC_METADATA.get_change_type('.$this->ch_id.') as ch_typ from dual')[0]->ch_typ; 
+        if ($ch_typ)
+            return Type::find($ch_typ);
+        else 
+            return null;
+    }
+    
+    public function caManualConditionFulfillments()
+    {
+        return $this->hasMany('App\CaManualConditionFulfillment', 'camcf_change_id');
+    }
+    
+    public function changeAdaptationAdditionalData()
+    {
+        return $this->hasMany('App\ChangeAdaptationAdditionalData', 'caad_change_id');
+    }
+    
+    public function changeAdaptationProcess()
+    {
+        return $this->hasMany('App\ChangeAdaptationProcess', 'cap_change_id');
+    }
     
 }

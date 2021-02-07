@@ -10,7 +10,7 @@
             </div>
             @endif
             <div class="card">
-                <div class="card-header"><h4>{{ $change->changeType->tp_type }}</h4></div>
+                <div class="card-header"><h4>{{ $change->getChangeType()->tp_type }}</h4></div>
                 <div class="card-body">
                 <p class="card-text">Status: {{ $change->statusType->tp_type }}</p>
                 <p class="card-text">Change of {{ strtolower($object['objectType']) }}: <a href="{{ url(strtolower($object['objectType']), $object['object']->getID()) }}">{{ $object['objectName'] }}</a></p>

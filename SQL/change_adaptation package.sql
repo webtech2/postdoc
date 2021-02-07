@@ -1,3 +1,7 @@
+--------------------------------------------------------
+--  DDL for Package change_adaptation
+--------------------------------------------------------
+
 create or replace package change_adaptation as
 
   function define_change_type(in_change in change%rowtype) return types.tp_id%type;
@@ -9,7 +13,7 @@ create or replace package change_adaptation as
   function dataset_example_added(in_change_id in change.ch_id%type) return boolean;
 
 end change_adaptation;
-
+/
 
 create or replace package body change_adaptation as
   -- Change status
@@ -32,7 +36,15 @@ create or replace package body change_adaptation as
   CONST_DATA_ITEM                 varchar2(50) := 'DATA ITEM';
   CONST_DATA_HIGHWAY_LVL          varchar2(50) := 'DATA HIGHWAY LEVEL';
   CONST_DATA_SET                  varchar2(50) := 'DATA SET';
+  CONST_MAPPING                   varchar2(50) := 'MAPPING';
+  CONST_RELATIONSHIP              varchar2(50) := 'RELATIONSHIP';
   CONST_METADATA_VAL_UPDATE       varchar2(50) := 'METADATA VALUE UPDATE';
+
+  -- Special change type
+  CONST_DATASET_FORMAT_CH         types.tp_id%type := 'CHT0000032';
+  CONST_DATASET_RENAMING          types.tp_id%type := 'CHT0000033';
+  CONST_DATAITEM_RENAMING         types.tp_id%type := 'CHT0000034';
+  CONST_DATAITEM_TYPE_CH          types.tp_id%type := 'CHT0000035';
 
   -- Scenario step condition type
   CONST_MANUAL_CONDITION          types.tp_id%type := 'CON0000002';
@@ -124,13 +136,30 @@ create or replace package body change_adaptation as
       when in_change.ch_datahighwaylevel_id is not null then
         v_subtype_prefix := CONST_DATA_HIGHWAY_LVL;
       when in_change.ch_dataset_id is not null then
-        v_subtype_prefix := CONST_DATA_SET;
+        if upper(in_change.ch_attrName)='DS_NAME' then
+          v_type := CONST_DATASET_RENAMING;
+        elsif upper(in_change.ch_attrName)='DS_FORMATTYPE_ID' then
+          v_type := CONST_DATASET_FORMAT_CH;
+        else
+          v_subtype_prefix := CONST_DATA_SET;
+        end if;
+      when in_change.ch_mapping_id is not null then
+        v_subtype_prefix := CONST_MAPPING;
+      when in_change.ch_relationship_id is not null then
+        v_subtype_prefix := CONST_RELATIONSHIP;
+      when in_change.ch_dataitem_id is not null then
+        if upper(in_change.ch_attrName)='DI_NAME' then
+          v_type := CONST_DATAITEM_RENAMING;
+        elsif upper(in_change.ch_attrName)='DI_ITEMTYPE_ID' then
+          v_type := CONST_DATAITEM_TYPE_CH;
+        else
+          v_subtype_prefix := CONST_DATA_ITEM;
+        end if;
       /*when in_change.ch_attrname is not null then
         v_subtype_prefix := CONST_METADATA_VAL_UPDATE;
       when in_change.ch_metadataproperty_id is not null then
         v_subtype_prefix := CONST_METADATA_PROPERTY;
-      when in_change.ch_dataitem_id is not null then
-        v_subtype_prefix := CONST_DATA_ITEM;*/
+      */
       else
         log_error('Could not detect change type! CHANGE_ID: ' || in_change.ch_id);
     end case;
@@ -524,3 +553,4 @@ create or replace package body change_adaptation as
   end add_dataitem_to_dataset;
 
 end change_adaptation;
+/

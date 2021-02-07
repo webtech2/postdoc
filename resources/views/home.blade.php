@@ -49,7 +49,7 @@
             </div>
 
             <div class="card">
-            <div  data-toggle="collapse" data-target=".change" class="card-header font-weight-bold">Changes</div>
+            <div  data-toggle="collapse" data-target=".change" class="card-header font-weight-bold">Changes | <a href="{{action('ChangeController@createChangeAdaptationProcesses')}}">Create change adaptation processes<a></div>
             @if ($changes->count()>0)
             <div class="card-text">
                 <table class="table table-hover">

@@ -61,6 +61,36 @@ class Type extends Model
         return $this->hasMany('App\Relationship', 'rl_relationshiptype_id');
     }    
 
+    public function caManualConditionsFulfillmentWithStatus()
+    {
+        return $this->hasMany('App\CaManualConditionFulfillment', 'camcf_fulfillmentstatus_id');
+    }    
+    
+    public function additionalDataWithType()
+    {
+        return $this->hasMany('App\ChangeAdaptationAdditionalData', 'caad_data_type_id');
+    }    
+
+    public function changeAdaptationProcessesWithType()
+    {
+        return $this->hasMany('App\ChangeAdaptationProcess', 'cap_statustype_id');
+    }    
+    
+    public function changeAdaptationConditionsWithType()
+    {
+        return $this->hasMany('App\ChangeAdaptationCondition', 'cac_conditiontype_id');
+    }    
+
+    public function changeAdaptationScenariosWithChangeType()
+    {
+        return $this->hasMany('App\ChangeAdaptationScenario', 'cas_changetype_id');
+    }    
+
+    public function changeAdaptationOperationsWithType()
+    {
+        return $this->hasMany('App\ChangeAdaptationOperation', 'cao_operationtype_id');
+    }    
+
     public function getPK() 
     {
         return $this->primaryKey;

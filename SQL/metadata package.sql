@@ -1,7 +1,4 @@
 --------------------------------------------------------
---  File created - Friday-November-15-2019   
---------------------------------------------------------
---------------------------------------------------------
 --  DDL for Package POSTDOC_METADATA
 --------------------------------------------------------
 
@@ -39,9 +36,10 @@ create or replace PACKAGE POSTDOC_METADATA AS
   function is_xml_uploaded (p_spec in varchar2) return number;  
    
   procedure compare_xml_metadata (p_ds_id in number);
+
+  function get_change_type (p_ch_id in number) return types.tp_id%type;
    
-END POSTDOC_METADATA;
-/
+END POSTDOC_METADATA;/
 
 
 create or replace PACKAGE BODY POSTDOC_METADATA AS
@@ -567,6 +565,18 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
     select count(*) into v_cnt from xml_nodes_copy where lower(spec) like '0 '||lower(p_spec) and rownum=1;
     return v_cnt;
   end is_xml_uploaded;
+  
+  function get_change_type (p_ch_id in number) return types.tp_id%type as
+    v_change change%rowtype;
+    v_ch_type varchar2(50);
+  begin
+    select * into v_change from change where ch_id=p_ch_id;
+    v_ch_type := change_adaptation.define_change_type(v_change);
+    return v_ch_type;
+  exception when no_data_found then
+    log_error('Change not found! P_CH_ID = '||p_ch_id);
+    return null;
+  end;
 
 END POSTDOC_METADATA;
 /
