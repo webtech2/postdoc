@@ -6,6 +6,8 @@ create or replace package change_adaptation as
 
   function define_change_type(in_change in change%rowtype) return types.tp_id%type;
 
+  procedure create_change_adaptation_proc;
+
   function get_change_adaptation_scenario(in_change_id in change.ch_id%type) return sys_refcursor;
 
   procedure adapt_changes;
@@ -29,10 +31,10 @@ create or replace package body change_adaptation as
   CONST_ADAPTED                   types.tp_id%type := 'CIP0000002';
 
   -- Process author
-  CONST_SYSTEM_AUTHOR              author.au_id%type := 3;
+  CONST_SYSTEM_AUTHOR              author.au_id%type := 1;
 
   -- Change subtype prefix
-  CONST_METADATA_PROPERTY         varchar2(50) := 'METADATA PROPERTY';
+  CONST_METADATA_PROPERTY         varchar2(50) := 'METADATA';
   CONST_DATA_ITEM                 varchar2(50) := 'DATA ITEM';
   CONST_DATA_HIGHWAY_LVL          varchar2(50) := 'DATA HIGHWAY LEVEL';
   CONST_DATA_SET                  varchar2(50) := 'DATA SET';
