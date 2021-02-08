@@ -8,7 +8,7 @@ Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) values (12,'If there is data which can not be replaced from another data sources','CON0000002');
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) values (13,'If there is no option to replace data source with data from another data sources','CON0000002');
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) values (14,'change_adaptation.alternative_data_sources_added','CON0000001');
-Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) values (5,'If data item needs to be added to a data set','CON0000002');
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) values (5,'If data item needs to be added to a data set of a data highway level','CON0000002');
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) values (6,'If data item needs to be added to a data set of a data source','CON0000002');
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) values (7,'change_adaptation.dataitem_example_added','CON0000001');
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) values (3,'If data set needs to be added to a data highway level','CON0000002');

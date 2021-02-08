@@ -26,6 +26,28 @@
                 @endif                    
                 </div>
             </div>
+            <div class="card">
+            <div data-toggle="collapse" data-target=".process" class="card-header font-weight-bold">Change adaptation process steps
+                <a class="btn btn-success float-right" href="{{ action('AdaptationController@runChangeAdaptationScenario', $change->ch_id) }}">Run change adaptation scenario</a>
+            </div>
+            @if ($change->changeAdaptationProcesses()->count()>0)
+            <div class="card-text">
+                <table class="table table-hover">
+                    <thead>
+                        <tr class="collapse show set">
+                            <th scope="col">Operation</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Type</th>
+                            <th scope="col" colspan="3">Conditions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @each ('partials.adapt_process', $change->changeAdaptationProcesses()->orderBy('cap_scenario_id')->get(), 'process' )
+                    </tbody>
+                </table>
+            </div>
+            @endif
+            </div>            
         </div>
     </div>
 </div>

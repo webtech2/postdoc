@@ -10,14 +10,19 @@
             </div>
             @endif
             <div class="card">
-                <div class="card-header"><h4>Data Set {{ $dset->ds_name }}</h4><a class="btn btn-success float-right" href="{{ action('DataSetController@compare', $dset->ds_id) }}">Refresh metadata</a> </div>
+                <div class="card-header">
+                    <h4>Data Set {{ $dset->ds_name }}</h4>
+                    <a class="btn btn-success float-right" href="{{ action('DataSetController@compare', $dset->ds_id) }}">Refresh metadata</a> 
+                </div>
                 <div class="card-body">
                 <p class="card-text">{{ $dset->ds_description }}</p>
                 @if ($dset->dataSource) 
                 <p class="card-text">Data source: <a href="{{ url('datasource', $dset->dataSource->so_id) }}">{{$dset->dataSource->so_name}}</a></p>
                 @endif
                 @if ($dset->dataHighwayLevel) 
-                <p class="card-text">Data highway level: <a href="{{ url('datahighwaylevel', $dset->dataHighwayLevel->hl_id) }}">{{$dset->dataHighwayLevel->hl_name}}</a></p>
+                <p class="card-text">Data highway level: 
+                    <a href="{{ url('datahighwaylevel', $dset->dataHighwayLevel->hl_id) }}">{{$dset->dataHighwayLevel->hl_name}}</a>
+                </p>
                 @endif
                 <p class="card-text">Format: {{$dset->formatType->tp_type}}</p>
                 <p class="card-text">Loading frequency: {{ $dset->ds_frequency }}</p>
@@ -55,7 +60,8 @@
                 </div>
                 <div class="card">
                 <div data-toggle="collapse" data-target=".prop" class="card-header font-weight-bold">Properties | 
-                    <a href="{{action('PropertyController@createForDataSet', ['id' => $dset->ds_id])}}">Create new<a></div>
+                    <a href="{{action('PropertyController@createForDataSet', ['id' => $dset->ds_id])}}">Create new<a>
+                </div>
                 @if ($dset->metadataProperties()->whereNull('md_deleted')->count()>0)
                 <div class="card-text">
                     <table class="table table-hover">

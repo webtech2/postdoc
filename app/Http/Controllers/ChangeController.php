@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Change;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use PDO;
 
 class ChangeController extends Controller
 {
@@ -86,18 +84,5 @@ class ChangeController extends Controller
     {
         //
     }
-
-    /**
-     * Create change adaptation processes for new changes.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function createChangeAdaptationProcesses()
-    {
-        $pdo = DB::getPdo();
-        $stmt;
-        $stmt = $pdo->prepare("begin change_adaptation.create_change_adaptation_proc; end;");
-        $stmt->execute();               
-        return redirect()->action('HomeController@index')->withSuccess('Change adaptation processes created!');
-    }    
+  
 }

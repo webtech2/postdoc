@@ -129,7 +129,7 @@ class Change extends Model
         return $this->hasMany('App\ChangeAdaptationAdditionalData', 'caad_change_id');
     }
     
-    public function changeAdaptationProcess()
+    public function changeAdaptationProcesses()
     {
         return $this->hasMany('App\ChangeAdaptationProcess', 'cap_change_id');
     }

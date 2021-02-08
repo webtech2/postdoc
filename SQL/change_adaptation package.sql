@@ -14,6 +14,13 @@ create or replace package change_adaptation as
 
   function dataset_example_added(in_change_id in change.ch_id%type) return boolean;
 
+  procedure set_process_adapted(in_process_id in changeadaptationprocess.cap_id%type);
+
+  procedure run_change_adaptation_scenario(in_change_id in change.ch_id%type);
+
+  procedure set_manual_condition_fulfilled(in_change_id in change.ch_id%type,
+                                           in_condition_id in changeadaptationcondition.cac_id%type);
+
 end change_adaptation;
 /
 
@@ -487,16 +494,23 @@ create or replace package body change_adaptation as
   procedure get_dataset_structure(in_change_id in change.ch_id%type) is
 
   begin
-   null; -- this procedure will not be implemented by author
+   null; -- to be implemented
   end get_dataset_structure;
 
 ---- Get dataitem structure ------------------------------------------------------------------------------------------------------------------------------------------------------------------
   procedure get_dataitem_structure(in_change_id in change.ch_id%type) is
 
   begin
-   null; -- this procedure will not be implemented by author
+   null; -- to be implemented
   end get_dataitem_structure;
 
+---- Get dataitem structure ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  procedure set_alternative_data_sources(in_change_id in change.ch_id%type) is
+
+  begin
+   null; -- to be implemented
+  end set_alternative_data_sources;
+  
 ---- Get dataset id
   function get_additional_dataset_id(in_change_id in change.ch_id%type) return dataset.ds_id%type is
     v_dataset_id dataset.ds_id%type;

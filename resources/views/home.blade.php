@@ -44,12 +44,15 @@
                 </div>
             </div>
             <div class="card">
-                <div data-toggle="collapse" data-target=".mapping" class="card-header font-weight-bold">Mappings | <a href="{{action('MappingController@create')}}">Create new<a></div>
-                          
+                <div data-toggle="collapse" data-target=".mapping" class="card-header font-weight-bold">Mappings | 
+                    <a href="{{action('MappingController@create')}}">Create new<a>
+                </div>                          
             </div>
 
             <div class="card">
-            <div  data-toggle="collapse" data-target=".change" class="card-header font-weight-bold">Changes | <a href="{{action('ChangeController@createChangeAdaptationProcesses')}}">Create change adaptation processes<a></div>
+            <div  data-toggle="collapse" data-target=".change" class="card-header font-weight-bold">Changes | 
+                <a href="{{action('AdaptationController@createChangeAdaptationProcesses')}}">Create change adaptation processes<a>
+            </div>
             @if ($changes->count()>0)
             <div class="card-text">
                 <table class="table table-hover">

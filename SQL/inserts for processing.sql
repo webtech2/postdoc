@@ -145,13 +145,13 @@ INSERT INTO types VALUES (
 
 INSERT INTO types VALUES (
     'CIP0000001',
-    'Not adapted',
+    'Not executed',
     'CIP0000000'
 );
 
 INSERT INTO types VALUES (
     'CIP0000002',
-    'Adapted',
+    'Executed',
     'CIP0000000'
 );
 
