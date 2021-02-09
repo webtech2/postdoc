@@ -66,6 +66,15 @@ class MappingController extends Controller
      */
     public function store(Request $request)
     {
+        $validatedData = $request->validate([
+            'dataitem' => [
+                'required|integer'
+            ],
+            'operation' => [
+                'min:3'
+            ],
+        ]);  
+        
         $temp = $request->all();
         $map = new Mapping();
         $map->mp_id = DB::select('select MAPPING_MP_ID_SEQ.nextval as mp_id from dual')[0]->mp_id; 

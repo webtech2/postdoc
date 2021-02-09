@@ -29,7 +29,10 @@
             @if ($change->changeAdaptationProcesses()->count()>0)
             <div class="card">
             <div data-toggle="collapse" data-target=".process" class="card-header font-weight-bold">Change adaptation process steps
+                @if ($change->statusType->tp_type=='In progress')
                 <a class="btn btn-success float-right" href="{{ action('AdaptationController@runChangeAdaptationScenario', $change->ch_id) }}">Run change adaptation scenario</a>
+                <a class="btn btn-info float-right" href="{{ action('AdaptationController@createAdditionalData', $change->ch_id) }}">Create additional data</a>
+                @endif
             </div>
             <div class="card-text">
                 <table class="table table-hover">

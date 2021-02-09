@@ -2,13 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Change;
 use App\ChangeAdaptationProcess;
+use App\Type;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PDO;
 
 class AdaptationController extends Controller
 {
+     /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
      * Create change adaptation processes for new changes.
      *
@@ -72,5 +84,32 @@ class AdaptationController extends Controller
         $stmt->execute();
         return redirect()->action('ChangeController@show', $ch_id)->withSuccess('Change adaptation scenario steps executed!');
     } 
+
+    /**
+     *  Show the form for creating additional data for the change.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function createAdditionalData($id)
+    {
+        $change = Change::find($id);
+        $object = $change->object();
+        $dtypes = Type::where('tp_type','Change adaptation additional data type')
+                ->first()->subTypes()->orderBy('tp_type')->get();
+        $types = Type::where('tp_parenttype_id','DST0000000')
+                ->where('tp_id','<>','FMT0000000')->get();
+        return view('changes.add_data', compact('change','object','dtypes','types'));
+    }  
     
+     /**
+     * Store newly created additional data for the change in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function storeAdditionalData(Request $request)
+    {
+        //
+    }
 }

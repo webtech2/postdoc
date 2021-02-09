@@ -45,6 +45,7 @@ create or replace package body change_adaptation as
   -- Change subtype prefix
   CONST_METADATA_PROPERTY         varchar2(50) := 'METADATA';
   CONST_DATA_ITEM                 varchar2(50) := 'DATA ITEM';
+  CONST_DATA_SOURCE               varchar2(50) := 'DATA SOURCE';
   CONST_DATA_HIGHWAY_LVL          varchar2(50) := 'DATA HIGHWAY LEVEL';
   CONST_DATA_SET                  varchar2(50) := 'DATA SET';
   CONST_MAPPING                   varchar2(50) := 'MAPPING';
@@ -142,6 +143,8 @@ create or replace package body change_adaptation as
     v_type types.tp_id%type default null;
   begin
     case
+      when in_change.ch_datasource_id is not null then
+        v_subtype_prefix := CONST_DATA_SOURCE;
       when in_change.ch_metadataproperty_id is not null then
         v_subtype_prefix := CONST_METADATA_PROPERTY;
       when in_change.ch_datahighwaylevel_id is not null then

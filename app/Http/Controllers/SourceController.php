@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Change;
 use App\DataSource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class SourceController extends Controller
 {
@@ -36,7 +40,7 @@ class SourceController extends Controller
      */
     public function create()
     {
-        //
+        return view('sources.create');
     }
 
     /**
@@ -47,7 +51,37 @@ class SourceController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'so_name' => [
+                'min:3|max:100|unique:datasource,so_name'
+            ],
+            'so_description' => [
+                'max:4000'
+            ],
+        ]);        
+
+        $user = Auth::user();
+        $author = $user->getAuthor();
+        
+        $source = new DataSource();
+
+        $source->so_name = $request['so_name'];
+        $source->so_description = $request['so_description'];
+        $source->so_created = Carbon::now();   
+        $source->so_id = DB::select('select datasource_so_id_seq.nextval as so_id from dual')[0]->so_id; 
+        
+        $source->save();
+        
+        $change = new Change();
+        $change->ch_id = DB::select('select CHANGE_CH_ID_SEQ.nextval as ch_id from dual')[0]->ch_id; 
+        $change->ch_changetype_id = DB::select("select tp_id from types where tp_type='Addition'")[0]->tp_id;
+        $change->ch_statustype_id = DB::select("select tp_id from types where tp_type='New'")[0]->tp_id;
+        $change->dataSource()->associate($source);
+        $change->author()->associate($author);
+        $change->ch_datetime = Carbon::now();
+        $change->save();
+        
+        return redirect()->action('SourceController@show', $source->so_id)->withSuccess('New data source added!');;
     }
 
     /**

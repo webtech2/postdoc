@@ -81,7 +81,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-8" style="margin:auto">
-                <img src="../images/ansamblis.jpg" alt="Project information" style="width:100%">
+                <img src="/images/ansamblis.jpg" alt="Project information" style="width:100%">
             </div>
         </div>
     </div>

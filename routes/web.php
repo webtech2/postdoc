@@ -48,3 +48,5 @@ Route::get('adaptation/createCAP', 'AdaptationController@createChangeAdaptationP
 Route::get('adaptation/execCAP/{id}', 'AdaptationController@setChangeAdaptationProcessExecuted');
 Route::get('adaptation/runscenario/{id}', 'AdaptationController@runChangeAdaptationScenario');
 Route::get('adaptation/fulfill/{ch_id}/{cond_id}', 'AdaptationController@setManualConditionFulfilled');
+Route::get('adaptation/data/{id}', 'AdaptationController@createAdditionalData');
+Route::post('adaptation/data', 'AdaptationController@storeAdditionalData');
