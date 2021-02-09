@@ -20,6 +20,8 @@ create or replace package change_adaptation as
 
   procedure set_manual_condition_fulfilled(in_change_id in change.ch_id%type,
                                            in_condition_id in changeadaptationcondition.cac_id%type);
+                                           
+  procedure rename_dhighlevel(in_change_id in change.ch_id%type);                                           
 
 end change_adaptation;
 /
@@ -28,7 +30,7 @@ create or replace package body change_adaptation as
   -- Change status
   CONST_NEW_CHANGE                types.tp_id%type := 'STT0000001';
   CONST_IN_PROGRESS               types.tp_id%type := 'STT0000002';
-
+  CONST_PROCESSED                 types.tp_id%type := 'STT0000003';
   -- Change adaptation type
   CONST_MANUAL                    types.tp_id%type := 'COP0000001';
   CONST_AUTOMATIC                 types.tp_id%type := 'COP0000002';
@@ -425,11 +427,11 @@ create or replace package body change_adaptation as
 
 ---- Execute specific change adaptation procedure -------------------------------------------------------------------------------------------------------------------------------------------
   procedure execute_adaptation_procedure(in_change_id      in change.ch_id%type,
-                                         in_procedure_name in changeadaptationoperation.cao_operation%type) is
+                                         in_procedure_name in changeadaptationoperation.cao_operation%type) is                                     
   begin
     execute immediate
       'begin
-         :result :=' || in_procedure_name ||'(:change_id);
+         ' || in_procedure_name ||'(:change_id);
        end;'
     using in_change_id;
   end execute_adaptation_procedure;
@@ -442,6 +444,20 @@ create or replace package body change_adaptation as
      where cap.cap_id = in_process_id;
   end set_process_adapted;
 
+---- Set change status to processed if all process steps executed ---------------------------------------------------------------------------------------------------------------------------------------
+  procedure set_to_processed_if_all_exec(in_change_id in change.ch_id%type) is    
+    v_count number(10);
+    v_adapted number(10);
+  begin
+    select sum(decode(cap_statustype_id,CONST_ADAPTED,1,0)), count(*) into v_adapted, v_count 
+    from changeadaptationprocess where cap_change_id=in_change_id;
+    
+    if v_count>0 and v_count=v_adapted then
+      update change set ch_statustype_id=CONST_PROCESSED where ch_id=in_change_id;
+    end if;
+    
+  end set_to_processed_if_all_exec;
+  
 ---- Tries to execute adaptation scenario for specific change (only consecutive, not already adapted and automatic change scenario operations can be executed)
   procedure run_change_adaptation_scenario(in_change_id in change.ch_id%type) is
     v_change_scenario sys_refcursor;   
@@ -466,6 +482,7 @@ create or replace package body change_adaptation as
       end if;
 
     end loop;
+    set_to_processed_if_all_exec(in_change_id);    
   end run_change_adaptation_scenario;  
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -489,6 +506,15 @@ create or replace package body change_adaptation as
     process_change_adaptations;
 
   end adapt_changes;
+
+---- Rename data highway level -------------------------------------------------------------------------------------------------------------------------------------------------------------
+  procedure rename_dhighlevel(in_change_id in change.ch_id%type) is
+    v_name change.ch_newattrvalue%type;
+    v_hl_id change.ch_datahighwaylevel_id%type;
+  begin
+    select ch_newattrvalue, ch_datahighwaylevel_id into v_name, v_hl_id from change where ch_id=in_change_id;
+    update datahighwaylevel set hl_name=v_name where hl_id=v_hl_id;
+  end rename_dhighlevel;
 
 ---- Get dataset structure ------------------------------------------------------------------------------------------------------------------------------------------------------------------
   procedure get_dataset_structure(in_change_id in change.ch_id%type) is

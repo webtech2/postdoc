@@ -7,24 +7,35 @@
         <td>{{$process->changeAdaptationScenario->changeAdaptationOperation->cao_operation}}</td>
         <td> 
             @if ($process->changeAdaptationScenario->changeAdaptationOperation->type->tp_id == 'COP0000001' 
-                and $process->statusType->tp_id == 'CIP0000001')
+                and $process->statusType->tp_id == 'CIP0000001'
+                and $process->manualConditionsFulfilled())
+                
                 <a class="btn btn-success float-right" 
-                   href="{{ action('AdaptationController@setChangeAdaptationProcessExecuted', $process->cap_id)}}"
+                   href="{{action('AdaptationController@setChangeAdaptationProcessExecuted', $process->cap_id)}}"
                    title="{{$process->statusType->tp_type}}">Set executed</a> 
             @else
                 {{$process->statusType->tp_type}}
             @endif
         </td>
         <td>{{$process->changeAdaptationScenario->changeAdaptationOperation->type->tp_type}}</td>
-        <th>Condition type</th>
-        <th>Condition</th>
-        <th>Status</th>
-    </tr>
+    
+    @php
+    $cnt=0
+    @endphp
+    
     @foreach ($process->changeAdaptationScenario->caConditionMappings as $cond)
+    
+    @if ($cnt>0)
     <tr>
         <td></td>
         <td></td>
         <td></td>
+    @endif
+    
+    @php
+    $cnt++
+    @endphp
+    
         <td>{{$cond->changeAdaptationCondition->type->tp_type}}</td>
         <td>{{$cond->changeAdaptationCondition->cac_condition}}</td>
         <td>

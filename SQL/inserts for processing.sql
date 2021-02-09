@@ -38,6 +38,7 @@ insert into types values ('CHT0000032', 'Change of data set format', 'CHT0000003
 insert into types values ('CHT0000033', 'Data set renaming', 'CHT0000003');
 insert into types values ('CHT0000034', 'Data item renaming', 'CHT0000003');
 insert into types values ('CHT0000035', 'Change of data item type', 'CHT0000003');
+insert into types values ('CHT0000036', 'Data highway level renaming', 'CHT0000003');
 
 INSERT INTO types VALUES (
     'CAP0000000',

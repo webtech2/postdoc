@@ -25,4 +25,19 @@ class ChangeAdaptationProcess extends Model
         return $this->belongsTo('App\ChangeAdaptationScenario', 'cap_scenario_id');
     }      
     
+    public function manualConditionsFulfilled() 
+    {
+        foreach ($this->changeAdaptationScenario->caConditionMappings as $cond) {
+            if ($cond->changeAdaptationCondition->type->tp_id=='CON0000002') {
+                if ($cond->changeAdaptationCondition
+                        ->caManualConditionFulfillments()
+                        ->where('camcf_change_id',$this->cap_change_id)
+                        ->first()->fulfillmentStatus->tp_id=='MCF0000001') {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    
 }
