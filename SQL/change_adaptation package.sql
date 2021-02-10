@@ -23,6 +23,10 @@ create or replace package change_adaptation as
                                            
   procedure rename_dhighlevel(in_change_id in change.ch_id%type);                                           
 
+  procedure add_dataset_example(in_change_id in change.ch_id%type,
+                                in_data_type in types.tp_id%type,
+                                in_data      in changeadaptationadditionaldata.caad_data%type);
+                                
 end change_adaptation;
 /
 

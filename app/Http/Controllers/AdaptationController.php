@@ -8,6 +8,7 @@ use App\Type;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PDO;
+use Illuminate\Validation\Rule;
 
 class AdaptationController extends Controller
 {
@@ -32,7 +33,8 @@ class AdaptationController extends Controller
         $stmt;
         $stmt = $pdo->prepare("begin change_adaptation.create_change_adaptation_proc; end;");
         $stmt->execute();               
-        return redirect()->action('HomeController@index')->withSuccess('Change adaptation processes created!');
+        return redirect()->action('HomeController@index')
+                ->withSuccess('Change adaptation processes created!');
     }  
 
     /**
@@ -44,11 +46,13 @@ class AdaptationController extends Controller
     public function setChangeAdaptationProcessExecuted($id)
     {
         $pdo = DB::getPdo();
-        $stmt = $pdo->prepare("begin change_adaptation.set_process_adapted(in_process_id=>:in_process_id); end;");
+        $stmt = $pdo->prepare("begin change_adaptation.set_process_adapted("
+                . "in_process_id=>:in_process_id); end;");
         $stmt->bindParam(':in_process_id', $id, PDO::PARAM_INT);
         $stmt->execute();
         $change = ChangeAdaptationProcess::find($id)->change;
-        return redirect()->action('ChangeController@show', $change->ch_id)->withSuccess('Change adaptation process set as executed!');
+        return redirect()->action('ChangeController@show', $change->ch_id)
+                ->withSuccess('Change adaptation process set as executed!');
     }    
 
     /**
@@ -62,10 +66,12 @@ class AdaptationController extends Controller
     public function runChangeAdaptationScenario($id)
     {
         $pdo = DB::getPdo();
-        $stmt = $pdo->prepare("begin change_adaptation.run_change_adaptation_scenario(in_change_id=>:in_change_id); end;");
+        $stmt = $pdo->prepare("begin change_adaptation.run_change_adaptation_scenario("
+                . "in_change_id=>:in_change_id); end;");
         $stmt->bindParam(':in_change_id', $id, PDO::PARAM_INT);
         $stmt->execute();
-        return redirect()->action('ChangeController@show', $id)->withSuccess('Change adaptation scenario steps executed!');
+        return redirect()->action('ChangeController@show', $id)
+                ->withSuccess('Change adaptation scenario steps executed!');
     }    
 
     /**
@@ -78,11 +84,13 @@ class AdaptationController extends Controller
     public function setManualConditionFulfilled($ch_id, $cond_id)
     {
         $pdo = DB::getPdo();
-        $stmt = $pdo->prepare("begin change_adaptation.set_manual_condition_fulfilled(in_change_id=>:in_change_id, in_condition_id=>:in_condition_id); end;");
+        $stmt = $pdo->prepare("begin change_adaptation.set_manual_condition_fulfilled("
+                . "in_change_id=>:in_change_id, in_condition_id=>:in_condition_id); end;");
         $stmt->bindParam(':in_change_id', $ch_id, PDO::PARAM_INT);
         $stmt->bindParam(':in_condition_id', $cond_id, PDO::PARAM_INT);
         $stmt->execute();
-        return redirect()->action('ChangeController@show', $ch_id)->withSuccess('Change adaptation scenario steps executed!');
+        return redirect()->action('ChangeController@show', $ch_id)
+                ->withSuccess('Change adaptation scenario steps executed!');
     } 
 
     /**
@@ -110,6 +118,52 @@ class AdaptationController extends Controller
      */
     public function storeAdditionalData(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'change' => [
+                'required',
+                'exists:change,ch_id',
+            ],
+            'type' => [
+                'required',
+                'exists:types,tp_id',
+                'starts_with:CAD',
+            ],
+            'file' => [
+                'file',
+                Rule::requiredIf($request->format != 'FMT0000031'),           
+            ],
+            'table_name' => [
+                'alpha_num',
+                Rule::requiredIf($request->format == 'FMT0000031'),           
+            ],            
+        ]); 
+        
+        $data = 'Format: '.$request->format;
+        
+        if ($request->hasFile('file') && $request->file('file')->isValid()) {
+            $path = $request->file('file')->store('files');
+            $data .= '; Path: '.$path; 
+        }
+        
+        if ($request->table_name) {
+            $data .= '; Table name: '.$request->table_name; 
+        }
+        
+        $temp = $request->all();
+        
+        if ($request->type == 'CAD0000001') {
+            $pdo = DB::getPdo();
+            $stmt = $pdo->prepare("begin change_adaptation.add_dataset_example("
+                    . "in_change_id=>:in_change_id, "
+                    . "in_data_type=>:in_data_type, "
+                    . "in_data=>:in_data); end;");
+            $stmt->bindParam(':in_change_id', $temp['change'], PDO::PARAM_INT);
+            $stmt->bindParam(':in_data_type', $temp['type'], PDO::PARAM_STR);
+            $stmt->bindParam(':in_data', $data);
+            $stmt->execute();            
+        }
+        
+        return redirect()->action('ChangeController@show', $temp['change'])
+                ->withSuccess('Change adaptation data successfully added!');
     }
 }

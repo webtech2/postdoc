@@ -124,9 +124,10 @@ class PropertyController extends Controller
                 'required',
                 'min:3',
                 'max:100',
-                Rule::unique('metadataproperty','md_name')->where(function ($query) use ($objcolumn, $id) {
-                    return $query->where($objcolumn, $id)->whereNull('md_deleted');
-                })
+                Rule::unique('metadataproperty','md_name')
+                    ->where(function ($query) use ($objcolumn, $id) {
+                        return $query->where($objcolumn, $id)->whereNull('md_deleted');
+                    })
             ],
             'value' => [
                 'required',

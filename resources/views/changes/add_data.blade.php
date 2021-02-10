@@ -23,7 +23,8 @@
                     <p class="card-text">Value after update: {{ $change->ch_newattrvalue }}</p>
                     @endif  
 
-                    <form method="POST" action="{{ action('AdaptationController@storeAdditionalData') }}">
+                    <form id="create" method="POST" enctype="multipart/form-data" 
+                          action="{{ action('AdaptationController@storeAdditionalData') }}">
                         @csrf
                         <input type="hidden" value="{{ $change->ch_id}}" name="change">
 
@@ -124,4 +125,21 @@
         </div>
     </div>
 </div>
+
+<script>
+    function checkFormat () {
+        if ($('#format option:selected').val() == 'FMT0000031') {
+            $('#file').prop( "disabled", true );
+            $('#table_name').prop( "disabled", false );
+        } else {
+            $('#file').prop( "disabled", false );
+            $('#table_name').prop( "disabled", true );            
+        }
+    }
+    
+    checkFormat();
+    
+    $('#format').on('change', checkFormat);
+
+</script>
 @endsection
