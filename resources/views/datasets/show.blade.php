@@ -56,6 +56,19 @@
                         @each('partials.dataitem_table', $dset->dataItems, 'item')
                         </tbody>
                     </table>
+                    @elseif ($dset->formatType->parentType->tp_type == 'Unstructured data set')
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Type</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @each('partials.dataitem_file', $dset->dataItems, 'item')
+                        </tbody>
+                    </table>
                     @endif
                 </div>
                 <div class="card">

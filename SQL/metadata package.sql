@@ -13,7 +13,8 @@ create or replace PACKAGE POSTDOC_METADATA AS
         p_role_id in varchar2 default null,
         p_formattype_id in varchar2 default null,
         p_freq in varchar2 default null,
-        p_usermail in varchar2 default null
+        p_usermail in varchar2 default null,
+        p_change in boolean default true   
         );
         
     procedure gather_xml_metadata (
@@ -26,9 +27,25 @@ create or replace PACKAGE POSTDOC_METADATA AS
         p_role_id in varchar2 default null,
         p_formattype_id in varchar2 default null,
         p_freq in varchar2 default null,
-        p_usermail in varchar2 default null        
+        p_usermail in varchar2 default null,
+        p_change in boolean default true           
     );
 
+  procedure create_unstructured_dataset (
+        p_ds_name in varchar2,
+        p_path in varchar2,
+        p_ds_id in number default null,
+        p_so_id in number default null,
+        p_hl_id in number default null,
+        p_ds_desc in varchar2 default null,
+        p_velocity_id in varchar2 default null,
+        p_role_id in varchar2 default null,
+        p_formattype_id in varchar2 default null,
+        p_freq in varchar2 default null,
+        p_usermail in varchar2 default null,
+        p_change in boolean default true   
+        );
+        
   procedure compare_table_structure (
         p_ds_id in number
     );
@@ -38,21 +55,45 @@ create or replace PACKAGE POSTDOC_METADATA AS
   procedure compare_xml_metadata (p_ds_id in number);
 
   function get_change_type (p_ch_id in number) return types.tp_id%type;
+
+  function copy_dataset_to_dhighlevel(
+    p_ds_id in dataset.ds_id%type, 
+    p_hl_id in dataHighwayLevel.hl_id%type, 
+    p_copy_mappings in boolean default true,
+    p_create_mappings in boolean default true) 
+    return dataset.ds_id%type;
    
-END POSTDOC_METADATA;/
+END POSTDOC_METADATA;
+/
 
 
 create or replace PACKAGE BODY POSTDOC_METADATA AS
 
   TYPE t_cons_cols IS TABLE OF all_cons_columns%rowtype index by binary_integer;
   TYPE t_meta_prop IS varray(5) of varchar2(100);
+  TYPE t_ids IS varray(7) of varchar2(50);
   
   c_type_col varchar2(10):='DIT0000001';
-  c_type_relFK varchar2(10):='RLT0000002';
-  c_type_relCom varchar2(10):='RLT0000001';
   c_type_xmlelem varchar2(10):='DIT0000002';
   c_type_xmlattr varchar2(10):='DIT0000003';
+  c_type_file varchar2(10):='DIT0000008';
+  
+  c_type_relFK varchar2(10):='RLT0000002';
+  c_type_relCom varchar2(10):='RLT0000001';
+  
   c_meta_prop t_meta_prop := t_meta_prop('DATA_TYPE', 'DATA_LENGTH', 'DATA_PRECISION', 'DATA_SCALE', 'NULLABLE');
+
+  c_meta_prop_ext varchar2(100):='File extension';
+  c_meta_prop_path varchar2(100):='File path';
+
+  c_id_dataset varchar2(50) := 'DATASET_ID';
+  c_id_dataitem varchar2(50) := 'DATAITEM_ID';
+  c_id_mapping varchar2(50) := 'MAPPING_ID';
+  c_id_datahighwaylevel varchar2(50) := 'DATAHIGHWAYLEVEL_ID';
+  c_id_datassource varchar2(50) := 'DATASOURCE_ID';
+  c_id_relationship varchar2(50) := 'RELATIONSHIP_ID';
+  c_id_datassetinstance varchar2(50) := 'DATASETINSTANCE_ID';
+  c_ids t_ids := t_ids(c_id_datassource, c_id_datahighwaylevel, c_id_dataset, c_id_datassetinstance, c_id_dataitem, c_id_relationship, c_id_mapping); 
   
   function insert_column_metadata (v_tab_col in all_tab_columns%rowtype, v_ds_id number) return number AS
     v_di_id number(10);
@@ -187,7 +228,8 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
         p_role_id varchar2 default null, 
         p_formattype_id in varchar2 default null,
         p_freq in varchar2 default null,
-        p_usermail in varchar2 default null
+        p_usermail in varchar2 default null,
+        p_change in boolean default true
         ) return number as
         
         v_ds_id number(10);
@@ -202,10 +244,12 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
         if p_usermail is not null then
           v_au_id:=get_author_id_by_usermail(p_usermail);
         end if;
-        select tp_id into v_ch_type from types where tp_type='Addition';
-        select tp_id into v_st_type from types where tp_type='New';
-        insert into change (CH_ID, CH_CHANGETYPE_ID, CH_STATUSTYPE_ID, CH_DATASET_ID, CH_AUTHOR_ID, CH_DATETIME) 
-                    values (CHANGE_CH_ID_SEQ.nextval, v_ch_type, v_st_type, v_ds_id, v_au_id, sysdate);
+        if p_change then
+            select tp_id into v_ch_type from types where tp_type='Addition';
+            select tp_id into v_st_type from types where tp_type='New';
+            insert into change (CH_ID, CH_CHANGETYPE_ID, CH_STATUSTYPE_ID, CH_DATASET_ID, CH_AUTHOR_ID, CH_DATETIME) 
+                        values (CHANGE_CH_ID_SEQ.nextval, v_ch_type, v_st_type, v_ds_id, v_au_id, sysdate);
+        end if;
         commit;
         return v_ds_id;
     end insert_dataset;
@@ -220,7 +264,8 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
         p_role_id in varchar2 default null,
         p_formattype_id in varchar2 default null,
         p_freq in varchar2 default null,
-        p_usermail in varchar2 default null
+        p_usermail in varchar2 default null,
+        p_change in boolean default true
         ) AS
         
         v_ds_id number(10):=p_ds_id;
@@ -230,7 +275,7 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
   BEGIN
     if p_ds_id is not null or (p_hl_id is not null or p_so_id is not null) and p_velocity_id is not null and p_formattype_id is not null then
         if p_ds_id is null then -- no existing data set, must create one
-            v_ds_id:=insert_dataset(p_table_name, p_ds_desc, p_so_id, p_hl_id, p_velocity_id, p_role_id, p_formattype_id, p_freq, p_usermail);
+            v_ds_id:=insert_dataset(p_table_name, p_ds_desc, p_so_id, p_hl_id, p_velocity_id, p_role_id, p_formattype_id, p_freq, p_usermail, p_change);
         end if;
         for v_tab_col in (select * from all_tab_columns where owner=v_owner and table_name = v_table) loop
             v_di_id:=insert_column_metadata(v_tab_col, v_ds_id);
@@ -246,6 +291,43 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
         end loop;
     end if;
   END gather_table_metadata;
+
+  procedure create_unstructured_dataset (
+        p_ds_name in varchar2,
+        p_path in varchar2,
+        p_ds_id in number default null,
+        p_so_id in number default null,
+        p_hl_id in number default null,
+        p_ds_desc in varchar2 default null,
+        p_velocity_id in varchar2 default null,
+        p_role_id in varchar2 default null,
+        p_formattype_id in varchar2 default null,
+        p_freq in varchar2 default null,
+        p_usermail in varchar2 default null,
+        p_change in boolean default true
+        ) AS
+        
+        v_ds_id number(10):=p_ds_id;
+        v_ext varchar2(100);
+        v_di_id dataitem.di_id%type;
+  BEGIN
+    if p_ds_id is not null or (p_hl_id is not null or p_so_id is not null) and p_velocity_id is not null and p_formattype_id is not null then
+        if p_ds_id is null then -- no existing data set, must create one
+            v_ds_id:=insert_dataset(p_ds_name, p_ds_desc, p_so_id, p_hl_id, p_velocity_id, p_role_id, p_formattype_id, p_freq, p_usermail, p_change);
+        end if;
+
+        insert into dataitem (di_name, di_dataset_id, di_itemtype_id, di_created) 
+          values (p_ds_name, v_ds_id, c_type_file, sysdate);
+        select dataitem_di_id_seq.currval into v_di_id from dual;
+        
+        v_ext := substr(p_path, instr(p_path,'.',-1)+1);
+        insert into metadataProperty (md_name, md_value, md_dataitem_id, md_created) 
+          values (c_meta_prop_ext,v_ext,v_di_id, sysdate);
+
+        insert into metadataProperty (md_name, md_value, md_dataitem_id, md_created) 
+          values (c_meta_prop_path,p_path,v_di_id, sysdate);
+    end if;
+  END create_unstructured_dataset;
   
   procedure property_value_change (p_md_id in number, p_old in varchar2, p_new in varchar2, p_attrname in varchar2, p_usermail in varchar2 default null) as
     v_au_id number(10):=null;
@@ -380,14 +462,15 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
         p_role_id in varchar2 default null,
         p_formattype_id in varchar2 default null,
         p_freq in varchar2 default null,
-        p_usermail in varchar2 default null        
+        p_usermail in varchar2 default null,
+        p_change in boolean default true        
     ) AS
     v_ds_id number(10):=p_ds_id;
     v_di_id number(10);
   begin
     if p_ds_id is not null or (p_hl_id is not null or p_so_id is not null) and p_velocity_id is not null and p_formattype_id is not null then
         if p_ds_id is null then -- no existing data set, must create one
-            v_ds_id:=insert_dataset(p_spec, p_ds_desc, p_so_id, p_hl_id, p_velocity_id, p_role_id, p_formattype_id, p_freq, p_usermail);
+            v_ds_id:=insert_dataset(p_spec, p_ds_desc, p_so_id, p_hl_id, p_velocity_id, p_role_id, p_formattype_id, p_freq, p_usermail, p_change);
         end if;
         for v_item in (select * from xml_nodes_copy where lower(spec) like '%'||lower(p_spec) and prev is null) loop
           v_di_id:=insert_xml_children_metadata(p_spec, v_item, v_ds_id, null);
@@ -577,6 +660,175 @@ create or replace PACKAGE BODY POSTDOC_METADATA AS
     log_error('Change not found! P_CH_ID = '||p_ch_id);
     return null;
   end;
+  
+--------------------------------------------------------------------------------------------------------------------------------
+  function copy_metadata_prop_to_element (
+    p_md_id in metadataProperty.md_id%type,
+    p_el_id in number,
+    p_elem_type in varchar2) 
+    return number is
+    
+    v_meta metadataProperty%rowtype;
+  begin
+    select * into v_meta from metadataProperty where md_id=p_md_id;
+    select metadataProperty_md_id_seq.nextval into v_meta.md_id from dual;
+    v_meta.md_DATASET_ID := case p_elem_type when c_id_dataset then p_el_id else null end;
+    v_meta.md_DATAITEM_ID := case p_elem_type when c_id_dataitem then p_el_id else null end;
+    v_meta.md_MAPPING_ID := case p_elem_type when c_id_mapping then p_el_id else null end;
+    v_meta.md_DATAHIGHWAYLEVEL_ID := case p_elem_type when c_id_datahighwaylevel then p_el_id else null end;
+    v_meta.md_DATASOURCE_ID := case p_elem_type when c_id_datassource then p_el_id else null end;
+    v_meta.md_RELATIONSHIP_ID := case p_elem_type when c_id_relationship then p_el_id else null end;
+    v_meta.md_DATASETINSTANCE_ID := case p_elem_type when c_id_datassetinstance then p_el_id else null end;
+    v_meta.md_created := sysdate;
+    v_meta.md_deleted := null;
+    insert into metadataProperty values v_meta;
+    return v_meta.md_id;
+  end copy_metadata_prop_to_element; 
+  
+--------------------------------------------------------------------------------------------------------------------------------
+  function copy_relationship_to_dataitem(
+    p_rl_id in relationship.rl_id%type,
+    p_di_id in dataitem.di_id%type) 
+    return relationship.rl_id%type is
+    
+    v_relationship relationship%rowtype;  
+    v_md_id metadataProperty.md_id%type;
+  begin
+    select * into v_relationship from relationship where rl_id=p_rl_id;
+    select relationship_rl_id_seq.nextval into v_relationship.rl_id from dual;
+    v_relationship.rl_parent_dataitem_id := p_di_id;
+    v_relationship.rl_created := sysdate;
+    v_relationship.rl_deleted := null;
+    insert into relationship values v_relationship;
+    
+    for v_relelem in (select * from relationshipElement where re_relationship_id=p_rl_id) loop
+      v_relelem.re_relationship_id := v_relationship.rl_id;
+      insert into relationshipElement values v_relelem;
+    end loop;
 
+    for v_md in (select md_id from metadataProperty where md_relationship_id=p_rl_id and md_deleted is null) loop
+      v_md_id := copy_metadata_prop_to_element(v_md.md_id, v_relationship.rl_id, c_id_relationship);
+    end loop;
+    
+    return v_relationship.rl_id;
+  end copy_relationship_to_dataitem;
+  
+--------------------------------------------------------------------------------------------------------------------------------
+  function copy_mapping_to_dataitem(
+    p_mp_id in mapping.mp_id%type,
+    p_di_id in dataitem.di_id%type) 
+    return mapping.mp_id%type is
+    
+    v_mapping mapping%rowtype;  
+    v_md_id metadataProperty.md_id%type;
+  begin
+    select * into v_mapping from mapping where mp_id=p_mp_id;
+    select mapping_mp_id_seq.nextval into v_mapping.mp_id from dual;
+    v_mapping.mp_target_dataitem_id := p_di_id;
+    v_mapping.mp_created := sysdate;
+    v_mapping.mp_deleted := null;
+    insert into mapping values v_mapping;
+    
+    for v_maporig in (select * from mappingOrigin where ms_mapping_id=p_mp_id) loop
+      v_maporig.ms_mapping_id := v_mapping.mp_id;
+      insert into mappingOrigin values v_maporig;
+    end loop;
+
+    for v_md in (select md_id from metadataProperty where md_mapping_id=p_mp_id and md_deleted is null) loop
+      v_md_id := copy_metadata_prop_to_element(v_md.md_id, v_mapping.mp_id, c_id_mapping);
+    end loop;
+    
+    return v_mapping.mp_id;
+  end copy_mapping_to_dataitem;
+  
+--------------------------------------------------------------------------------------------------------------------------------
+  function copy_dataitem_to_dataset(
+    p_di_id in dataitem.di_id%type, 
+    p_ds_id in dataset.ds_id%type, 
+    p_copy_mappings in boolean default true,
+    p_create_mapping in boolean default true) 
+    return dataitem.di_id%type is
+    
+    v_dataitem dataitem%rowtype;
+    v_mp_id mapping.mp_id%type;
+    v_md_id metadataProperty.md_id%type;
+    v_rl_id relationship.rl_id%type;
+  begin
+    select * into v_dataitem from dataitem where di_id=p_di_id;
+    select dataitem_di_id_seq.nextval into v_dataitem.di_id from dual;
+    v_dataitem.di_dataset_id := p_ds_id;
+    v_dataitem.di_created := sysdate;
+    v_dataitem.di_deleted := null;
+    insert into dataitem values v_dataitem;
+
+    -- if there are relationships between the copied data item and other data item in the data set, replace child dataitem to new one
+    for v_re in (select re.* from relationshipelement re 
+      join relationship r on rl_id=re_relationship_id
+      join dataitem di on di_id=rl_parent_dataitem_id
+      where re_child_dataitem_id=p_di_id
+      and di_dataset_id=p_ds_id) loop
+      
+      update relationshipelement set re_child_dataitem_id=v_dataitem.di_id 
+        where re_child_dataitem_id=v_re.re_child_dataitem_id and re_relationship_id=v_re.re_relationship_id;
+        
+    end loop;
+    
+    if p_copy_mappings then
+      -- copy mappings
+      for v_map in (select mp_id from mapping where mp_target_dataitem_id=p_di_id and mp_deleted is null) loop
+        v_mp_id := copy_mapping_to_dataitem(v_map.mp_id, v_dataitem.di_id);
+      end loop;
+    end if;
+    
+    for v_rel in (select rl_id from relationship where rl_parent_dataitem_id=p_di_id and rl_deleted is null) loop
+      v_rl_id := copy_relationship_to_dataitem(v_rel.rl_id, v_dataitem.di_id);
+    end loop;
+
+    for v_md in (select md_id from metadataProperty where md_dataitem_id=p_di_id and md_deleted is null) loop
+      v_md_id := copy_metadata_prop_to_element(v_md.md_id, v_dataitem.di_id, c_id_dataitem);
+    end loop;
+    
+    if p_create_mapping then
+      -- create mapping between copied data items
+      select mapping_mp_id_seq.nextval into v_mp_id from dual;
+      insert into mapping (mp_id, mp_target_dataitem_id, mp_operation, mp_created)
+        values (v_mp_id, v_dataitem.di_id, '?0?', sysdate);
+      
+      insert into mappingOrigin (ms_mapping_id, ms_origin_dataitem_id, ms_order)
+        values (v_mp_id, p_di_id, 0);
+    end if;
+    
+    return v_dataitem.di_id;
+  end copy_dataitem_to_dataset;
+  
+--------------------------------------------------------------------------------------------------------------------------------
+  function copy_dataset_to_dhighlevel(
+    p_ds_id in dataset.ds_id%type, 
+    p_hl_id in dataHighwayLevel.hl_id%type, 
+    p_copy_mappings in boolean default true,
+    p_create_mappings in boolean default true) 
+    return dataset.ds_id%type is
+    
+    v_di_id dataitem.di_id%type;
+    v_md_id metadataProperty.md_id%type;
+    v_dataset dataset%rowtype;
+  begin
+    select * into v_dataset from dataset where ds_id=p_ds_id;
+    select dataset_ds_id_seq.nextval into v_dataset.ds_id from dual;
+    v_dataset.ds_datahighwaylevel_id := p_hl_id;
+    v_dataset.ds_datasource_id := null;
+    insert into dataset values v_dataset;
+    
+    for v_di in (select di_id from dataitem where di_dataset_id=p_ds_id and di_deleted is null) loop
+      v_di_id := copy_dataitem_to_dataset(v_di.di_id, v_dataset.ds_id, p_copy_mappings, p_create_mappings);
+    end loop;
+    
+    for v_md in (select md_id from metadataProperty where md_dataset_id=p_ds_id and md_deleted is null) loop
+      v_md_id := copy_metadata_prop_to_element(v_md.md_id, v_dataset.ds_id, c_id_dataset);
+    end loop;
+    
+    return v_dataset.ds_id;
+  end copy_dataset_to_dhighlevel;
+  
 END POSTDOC_METADATA;
 /

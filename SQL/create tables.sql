@@ -372,6 +372,12 @@ INSERT INTO types VALUES (
 );
 
 INSERT INTO types VALUES (
+    'DIT0000008',
+    'File',
+    'DIT0000000'
+);
+
+INSERT INTO types VALUES (
     'STT0000000',
     'Status type',
     NULL

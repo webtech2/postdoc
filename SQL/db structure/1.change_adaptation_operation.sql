@@ -27,7 +27,7 @@ insert into changeadaptationoperation values (
 insert into changeadaptationoperation values (
     3,
     'COP0000001',
-    'Implement ELT processes in mapping metadata.'
+    'Implement ETL processes in mapping metadata.'
 );
 insert into changeadaptationoperation values (
     4,

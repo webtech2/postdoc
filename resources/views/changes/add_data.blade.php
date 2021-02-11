@@ -27,6 +27,7 @@
                           action="{{ action('AdaptationController@storeAdditionalData') }}">
                         @csrf
                         <input type="hidden" value="{{ $change->ch_id}}" name="change">
+                        <input type="hidden" value="{{ $object['object']->getID()}}" name="{{strtolower($object['objectType'])}}">
 
                         <div class="form-group row">
                             <label for="dtype" class="col-md-4 col-form-label text-md-right">Type of additional data</label>
@@ -47,6 +48,66 @@
                             </div>
                         </div>
 
+                        <div class="form-group row">
+                            <label for="ds_name" class="col-md-4 col-form-label text-md-right">Dataset name</label>
+
+                            <div class="col-md-6">
+                                <input id="ds_name" type="text" class="form-control @error('ds_name') is-invalid @enderror" name="ds_name" value="{{ old('ds_name') }}" autocomplete="ds_name">
+
+                                @error('ds_name')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="ds_desc" class="col-md-4 col-form-label text-md-right">Description</label>
+
+                            <div class="col-md-6">
+                                <textarea id="ds_desc" rows="5" class="form-control @error('ds_desc') is-invalid @enderror" name="ds_desc" autocomplete="ds_desc">{{ old('ds_desc') }}</textarea>
+
+                                @error('ds_desc')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+                        
+                        <div class="form-group row">
+                            <label for="velocity" class="col-md-4 col-form-label text-md-right">Velocity</label>
+   
+                            <div class="col-md-6">
+                                <select id="velocity" class="form-control @error('velocity') is-invalid @enderror" name="velocity" value="{{ old('velocity') }}" required autocomplete="velocity" >
+                                    @foreach ($velocities as $velocity)
+                                    <option value="{{ $velocity->tp_id }}">{{ $velocity->tp_type}}</option>
+                                    @endforeach
+                                </select>
+
+                                @error('velocity')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="frequency" class="col-md-4 col-form-label text-md-right">Frequency</label>
+
+                            <div class="col-md-6">
+                                <textarea id="frequency" rows="5" class="form-control @error('frequency') is-invalid @enderror" name="frequency" required autocomplete="frequency">{{ old('frequency') }}</textarea>
+
+                                @error('frequency')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+                        
                         <div class="form-group row">
                             <label for="type" class="col-md-4 col-form-label text-md-right">Data set type</label>
    

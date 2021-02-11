@@ -28,6 +28,11 @@ class ChangeAdaptationAdditionalData extends Model
             $type = Type::where('tp_id',$format)->first()->tp_type;
             $data = str_replace($format, $type, $data);
         }
+        if (strpos($data,'Velocity:') !== false) {
+            $velocity = substr($data,strpos($data,'Velocity:')+10,10);
+            $type = Type::where('tp_id',$velocity)->first()->tp_type;
+            $data = str_replace($velocity, $type, $data);
+        }
         return $data;
     }
 }

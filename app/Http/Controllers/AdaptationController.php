@@ -107,7 +107,8 @@ class AdaptationController extends Controller
                 ->first()->subTypes()->orderBy('tp_type')->get();
         $types = Type::where('tp_parenttype_id','DST0000000')
                 ->where('tp_id','<>','FMT0000000')->get();
-        return view('changes.add_data', compact('change','object','dtypes','types'));
+        $velocities = Type::where('tp_parenttype_id','VLT0000000')->get();
+        return view('changes.add_data', compact('change','object','dtypes','types','velocities'));
     }  
     
      /**
@@ -118,6 +119,8 @@ class AdaptationController extends Controller
      */
     public function storeAdditionalData(Request $request)
     {
+        $ds = $request->datasource;
+        
         $validatedData = $request->validate([
             'change' => [
                 'required',
@@ -135,7 +138,23 @@ class AdaptationController extends Controller
             'table_name' => [
                 'alpha_num',
                 Rule::requiredIf($request->format == 'FMT0000031'),           
-            ],            
+            ],   
+            'ds_name' => [
+                'required',
+                Rule::unique('dataset','ds_name')
+                    ->where(function ($query) use ($ds) {
+                        return $query->where('ds_datasource_id', $ds)->whereNull('ds_deleted');
+                    })
+            ],
+            'velocity' => [
+                'required',
+                'exists:types,tp_id',
+                'starts_with:VLT',
+            ],
+            'frequency' => [
+                'required',
+            ],
+                            
         ]); 
         
         $data = 'Format: '.$request->format;
@@ -148,6 +167,11 @@ class AdaptationController extends Controller
         if ($request->table_name) {
             $data .= '; Table name: '.$request->table_name; 
         }
+        
+        $data .= '; Data source name: '.$request->ds_name;
+        $data .= '; Data source description: '.$request->ds_desc;
+        $data .= '; Velocity: '.$request->velocity;
+        $data .= '; Frequency: '.$request->frequency;
         
         $temp = $request->all();
         

@@ -55,7 +55,8 @@ class DataSet extends MetadataModelElement
     public function topDataItems()
     {
         if ($this->formatType->tp_type=='XML')
-            return $this->hasMany('App\DataItem', 'di_dataset_id')->whereNotExists(function ($query) {
+            return $this->hasMany('App\DataItem', 'di_dataset_id')
+                ->whereNotExists(function ($query) {
                 $query->select(DB::raw(1))
                      ->from('relationshipelement')
                      ->whereRaw('re_child_dataitem_id = di_id');

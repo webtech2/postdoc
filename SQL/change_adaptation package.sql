@@ -26,7 +26,11 @@ create or replace package change_adaptation as
   procedure add_dataset_example(in_change_id in change.ch_id%type,
                                 in_data_type in types.tp_id%type,
                                 in_data      in changeadaptationadditionaldata.caad_data%type);
-                                
+
+  procedure get_dataset_structure(in_change_id in change.ch_id%type);
+  
+  procedure add_dataset_to_1st_dhighlevel(in_change_id in change.ch_id%type);
+  
 end change_adaptation;
 /
 
@@ -62,6 +66,9 @@ create or replace package body change_adaptation as
   CONST_DATAITEM_RENAMING         types.tp_id%type := 'CHT0000034';
   CONST_DATAITEM_TYPE_CH          types.tp_id%type := 'CHT0000035';
 
+  CONST_DATASOURCE_ADDITION       types.tp_id%type := 'CHT0000015';
+  CONST_DATAHL_ADDITION           types.tp_id%type := 'CHT0000013';
+
   -- Scenario step condition type
   CONST_MANUAL_CONDITION          types.tp_id%type := 'CON0000002';
   CONST_AUTOMATIC_CONDITION       types.tp_id%type := 'CON0000001';
@@ -81,6 +88,12 @@ create or replace package body change_adaptation as
   -- Data highway level
   CONST_FIRST_DATA_HIGHWAY_LEVEL  datahighwaylevel.hl_id%type := 2;
 
+  -- Data set formats
+  CONST_FORMAT_XML                types.tp_id%type := 'FMT0000011';
+  CONST_FORMAT_REL                types.tp_id%type := 'FMT0000031';
+  CONST_FORMAT_TXT                types.tp_id%type := 'FMT0000021';
+  
+  
   type t_scenario_step is record (
       operation_type        types.tp_type%type,
       operation_type_id     changeadaptationoperation.cao_operationtype_id%type,
@@ -328,7 +341,7 @@ create or replace package body change_adaptation as
       from changeadaptationadditionaldata caad
      where caad.caad_change_id = in_change_id;
 
-    if v_added_count = 1 then
+    if v_added_count > 0 then
       v_is_added := true;    
     end if;
 
@@ -526,8 +539,42 @@ create or replace package body change_adaptation as
 ---- Get dataset structure ------------------------------------------------------------------------------------------------------------------------------------------------------------------
   procedure get_dataset_structure(in_change_id in change.ch_id%type) is
 
+        v_name varchar2(100);
+        v_so_id number(10);
+        v_hl_id number(10);
+        v_ds_desc varchar2(4000);
+        v_velocity_id types.tp_id%type;
+        v_formattype_id types.tp_id%type;
+        v_freq varchar2(100);
+        v_path varchar2(1000);
   begin
-   null; -- to be implemented
+    -- zgrd.xmln procedure must be executed for xml documents -- to do: add automatic execution
+    for v_data in (select * from changeAdaptationAdditionalData where caad_change_id=in_change_id) loop
+      
+      v_formattype_id := helpers.get_value_from_str(v_data.caad_data, 'Format');
+      v_name := helpers.get_value_from_str(v_data.caad_data, 'Data source name');
+      v_ds_desc := helpers.get_value_from_str(v_data.caad_data, 'Data source description', true);
+      v_velocity_id := helpers.get_value_from_str(v_data.caad_data, 'Velocity');
+      v_freq := helpers.get_value_from_str(v_data.caad_data, 'Frequency', true);
+      v_path := helpers.get_value_from_str(v_data.caad_data, 'Path', true);
+      
+      select ch_datasource_id, ch_datahighwaylevel_id into v_so_id, v_hl_id from change where ch_id=in_change_id;
+      
+      if v_formattype_id=CONST_FORMAT_XML then
+        POSTDOC_METADATA.gather_xml_metadata(v_name, null, v_so_id, v_hl_id, v_ds_desc, v_velocity_id, null, v_formattype_id, 
+          v_freq, null, false);
+      
+      elsif v_formattype_id=CONST_FORMAT_REL then
+        POSTDOC_METADATA.gather_table_metadata(v_name, null, v_so_id, v_hl_id, v_ds_desc, v_velocity_id, null, v_formattype_id, 
+          v_freq, null, false);
+      
+      elsif v_formattype_id=CONST_FORMAT_TXT then
+        POSTDOC_METADATA.create_unstructured_dataset(v_name, v_path, null, v_so_id, v_hl_id, v_ds_desc, v_velocity_id, null, 
+          v_formattype_id, v_freq, null, false);
+      end if;
+      
+    end loop;
+    
   end get_dataset_structure;
 
 ---- Get dataitem structure ------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -576,13 +623,24 @@ create or replace package body change_adaptation as
 
 ---- Add dataset to the first data highway level
   procedure add_dataset_to_1st_dhighlevel(in_change_id in change.ch_id%type) is
-    v_dataset_id dataset.ds_id%type;
+    v_hl_id datahighwaylevel.hl_id%type;
+    v_ds_id dataset.ds_id%type;
   begin
-    v_dataset_id := get_additional_dataset_id(in_change_id);
-    --sets data highway level of the data set   
-    update dataset
-       set ds_datahighwaylevel_id = CONST_FIRST_DATA_HIGHWAY_LEVEL
-     where ds_id = v_dataset_id;
+    -- get id of data highwaylevel Raw data level
+    select hl_id into v_hl_id from datahighwaylevel where upper(hl_name)=upper('Raw data level');
+    
+    -- get datasets from the changed data source
+    for v_dataset in (select ds.ds_id   
+      from changeadaptationadditionaldata caad 
+      join change ch on ch.ch_id=caad.caad_change_id
+      join dataset ds on ds.ds_datasource_id=ch.ch_datasource_id and ds.ds_name=helpers.get_value_from_str(caad_data, 'Data source name')
+      where caad.caad_change_id = in_change_id) loop
+      
+      v_ds_id:=postdoc_metadata.copy_dataset_to_dhighlevel(v_dataset.ds_id, v_hl_id);
+    end loop; 
+    
+    -- create mappings from source to data highway 
+
   end add_dataset_to_1st_dhighlevel;
 
 -- Add data item to data set
