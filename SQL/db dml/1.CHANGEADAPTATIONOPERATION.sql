@@ -54,3 +54,12 @@ values (17,'COP0000002','change_adaptation.set_alternative_data_sources');
 Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
 values (18,'COP0000002','change_adaptation.rename_dhighlevel');
 
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (19,'COP0000002','change_adaptation.add_dataitem_to_1st_dhighlevel');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (20,'COP0000001','Define mapping for the new data item and metadata properties.');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (21,'COP0000001','Add new data source');
+

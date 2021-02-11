@@ -31,6 +31,12 @@ create or replace package change_adaptation as
   
   procedure add_dataset_to_1st_dhighlevel(in_change_id in change.ch_id%type);
   
+  procedure add_dataitem_to_1st_dhighlevel(in_change_id in change.ch_id%type);
+
+  function dataitem_added_to_datasource (in_change_id in change.ch_id%type) return boolean;
+  
+  function dataitem_added_to_dhlevel (in_change_id in change.ch_id%type) return boolean;
+  
 end change_adaptation;
 /
 
@@ -350,6 +356,49 @@ create or replace package body change_adaptation as
     return v_is_added;    
   end dataset_example_added;
 
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function dataitem_added_to (in_change_id in change.ch_id%type) return varchar2 is
+  
+    v_type varchar2(20);
+  begin
+    select decode(ds_datasource_id, null, decode(ds_datahighwaylevel_id, null, null, CONST_DATA_HIGHWAY_LVL), CONST_DATA_SOURCE)
+      into v_type
+      from change ch 
+    join dataitem di on di_id=ch_dataitem_id
+    join dataset ds on ds_id=di_dataset_id
+    where ch_id=in_change_id;
+
+    return v_type;    
+  end dataitem_added_to;
+  
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function dataitem_added_to_datasource (in_change_id in change.ch_id%type) return boolean is
+  
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    v_type := dataitem_added_to(in_change_id);
+    if v_type = CONST_DATA_SOURCE then
+      v_fulfilled := true;    
+    end if;
+
+    return v_fulfilled;    
+  end dataitem_added_to_datasource;
+  
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function dataitem_added_to_dhlevel (in_change_id in change.ch_id%type) return boolean is
+
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    v_type := dataitem_added_to(in_change_id);
+    if v_type = CONST_DATA_HIGHWAY_LVL then
+      v_fulfilled := true;    
+    end if;
+
+    return v_fulfilled;     
+  end dataitem_added_to_dhlevel;
+  
 ---- Returns cahnge scenario with all conditions----------------------------------------------------------------------------------------------------------------------------------------------------
   function get_change_adaptation_scenario(in_change_id in change.ch_id%type) return sys_refcursor is
     v_scenario sys_refcursor;
@@ -638,26 +687,56 @@ create or replace package body change_adaptation as
       
       v_ds_id:=postdoc_metadata.copy_dataset_to_dhighlevel(v_dataset.ds_id, v_hl_id);
     end loop; 
-    
-    -- create mappings from source to data highway 
 
   end add_dataset_to_1st_dhighlevel;
 
--- Add data item to data set
-  procedure add_dataitem_to_dataset(in_change_id in change.ch_id%type) is
-    v_dataset_id dataset.ds_id%type;
-    v_dataitem_id dataitem.di_id%type;
+-- Add data item to the 1st level of the data highway
+  procedure add_dataitem_to_1st_dhighlevel(in_change_id in change.ch_id%type) is
+    v_ds_id dataset.ds_id%type;
+    v_di_id dataitem.di_id%type;
+    v_new_di_id dataitem.di_id%type;
+    v_parent_di_id dataitem.di_id%type;
+    v_rltype types.tp_id%type;
+    v_rl_id relationship.rl_id%type;
   begin
-    v_dataset_id := get_additional_dataset_id(in_change_id);
-    select ch_dataitem_id
-      into v_dataitem_id
-      from change
-     where ch_id = in_change_id;
+    -- get data set at the 1st level of the data highway
+    select ds2.ds_id 
+      into v_ds_id
+      from change 
+      join dataitem on di_id=ch_dataitem_id
+      join dataset ds on ds.ds_id=di_dataset_id
+      join dataset ds2 on upper(ds2.ds_name) = upper(ds.ds_name)
+      join datahighwaylevel on hl_id=ds2.ds_datahighwaylevel_id
+      where ch_id=in_change_id and upper(hl_name)=upper('Raw data level');
+    
+    -- get changed dataitem
+    select ch_dataitem_id 
+      into v_di_id 
+      from change 
+      where ch_id = in_change_id;
+          
+    -- copy data item metadata
+    v_new_di_id:=postdoc_metadata.copy_dataitem_to_dataset(v_di_id, v_ds_id);
+    
+    -- if it is child of other data item, create the necessary relationship
+    for v_rel in
+      (select mp_target_dataitem_id, rl_relationshiptype_id 
+        into v_parent_di_id, v_rltype
+        from relationshipelement 
+        join relationship on rl_id=re_relationship_id
+        join mappingorigin on ms_origin_dataitem_id=rl_parent_dataitem_id
+        join mapping on mp_id=ms_mapping_id
+        where re_child_dataitem_id=v_di_id) loop
+        
+      select relationship_rl_id_seq.nextval into v_rl_id from dual;
+      insert into relationship (rl_id, rl_parent_dataitem_id, rl_relationshiptype_id,  rl_created)
+        values (v_rl_id, v_rel.mp_target_dataitem_id, v_rel.rl_relationshiptype_id, sysdate);
+      
+      insert into relationshipelement (re_child_dataitem_id, re_relationship_id)
+        values (v_new_di_id, v_rl_id);
+    end loop;
 
-    update dataitem
-       set di_dataset_id = v_dataset_id
-     where di_id = v_dataitem_id;
-  end add_dataitem_to_dataset;
+  end add_dataitem_to_1st_dhighlevel;
 
 end change_adaptation;
 /

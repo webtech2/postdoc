@@ -62,6 +62,13 @@ create or replace PACKAGE POSTDOC_METADATA AS
     p_copy_mappings in boolean default true,
     p_create_mappings in boolean default true) 
     return dataset.ds_id%type;
+
+  function copy_dataitem_to_dataset(
+    p_di_id in dataitem.di_id%type, 
+    p_ds_id in dataset.ds_id%type, 
+    p_copy_mappings in boolean default true,
+    p_create_mapping in boolean default true) 
+    return dataitem.di_id%type;
    
 END POSTDOC_METADATA;
 /
