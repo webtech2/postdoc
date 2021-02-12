@@ -63,3 +63,14 @@ values (20,'COP0000001','Define mapping for the new data item and metadata prope
 Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
 values (21,'COP0000001','Add new data source');
 
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (22,'COP0000001','Define alternative data items');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (23,'COP0000002','change_adaptation.set_alternative_data_items');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (24,'COP0000002','change_adaptation.skip_dependent_dataitems');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (25,'COP0000002','change_adaptation.replace_dependent_dataitems');

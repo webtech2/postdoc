@@ -68,7 +68,8 @@ class MappingController extends Controller
     {
         $validatedData = $request->validate([
             'dataitem' => [
-                'required|integer'
+                'required',
+                'integer'
             ],
             'operation' => [
                 'min:3'

@@ -55,3 +55,19 @@ values (19,'change_adaptation.dataitem_added_to_dhlevel','CON0000001');
 
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
 values (20,'If a new data source is required','CON0000002');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (21,'change_adaptation.dataitem_from_datasource','CON0000001');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (22,'If there is an option to replace data item with data from another data items','CON0000002');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (23,'change_adaptation.alternative_data_items_added','CON0000001');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (24,'If there are no options to replace data item with data from another data items','CON0000002');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (25,'change_adaptation.dataitem_from_dhlevel','CON0000001');
+

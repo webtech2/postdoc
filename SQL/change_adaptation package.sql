@@ -36,6 +36,18 @@ create or replace package change_adaptation as
   function dataitem_added_to_datasource (in_change_id in change.ch_id%type) return boolean;
   
   function dataitem_added_to_dhlevel (in_change_id in change.ch_id%type) return boolean;
+
+  function dataitem_from_datasource (in_change_id in change.ch_id%type) return boolean;
+
+  function dataitem_from_dhlevel (in_change_id in change.ch_id%type) return boolean;
+  
+  function alternative_data_items_added (in_change_id in change.ch_id%type) return boolean;
+  
+  procedure set_alternative_data_items(in_change_id in change.ch_id%type);
+  
+  procedure skip_dependent_dataitems(in_change_id in change.ch_id%type);
+  
+  procedure replace_dependent_dataitems(in_change_id in change.ch_id%type);
   
 end change_adaptation;
 /
@@ -99,6 +111,8 @@ create or replace package body change_adaptation as
   CONST_FORMAT_REL                types.tp_id%type := 'FMT0000031';
   CONST_FORMAT_TXT                types.tp_id%type := 'FMT0000021';
   
+  -- Relationship types
+  CONT_REL_COMPOSITION            types.tp_id%type := 'RLT0000001';
   
   type t_scenario_step is record (
       operation_type        types.tp_type%type,
@@ -108,7 +122,8 @@ create or replace package body change_adaptation as
       operation_status_id   changeadaptationprocess.cap_statustype_id%type,
       manual_condition      changeadaptationcondition.cac_condition%type,
       automatic_condition   changeadaptationcondition.cac_condition%type,
-      process_id            changeadaptationprocess.cap_id%type
+      process_id            changeadaptationprocess.cap_id%type,
+      cas_parentscenario_id changeadaptationscenario.cas_id%type
   );
 
 ---- Returns change type adaption scenario --------------------------------------------------------------------------------------------------------------------------------------------------
@@ -357,7 +372,7 @@ create or replace package body change_adaptation as
   end dataset_example_added;
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  function dataitem_added_to (in_change_id in change.ch_id%type) return varchar2 is
+  function dataitem_from (in_change_id in change.ch_id%type) return varchar2 is
   
     v_type varchar2(20);
   begin
@@ -369,7 +384,46 @@ create or replace package body change_adaptation as
     where ch_id=in_change_id;
 
     return v_type;    
-  end dataitem_added_to;
+  end dataitem_from;
+  
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function dataitem_from_datasource (in_change_id in change.ch_id%type) return boolean is
+  
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    v_type := dataitem_from(in_change_id);
+    if v_type = CONST_DATA_SOURCE then
+      v_fulfilled := true;    
+    end if;
+
+    return v_fulfilled;        
+  end dataitem_from_datasource;
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function dataitem_from_dhlevel (in_change_id in change.ch_id%type) return boolean is
+
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    v_type := dataitem_from(in_change_id);
+    if v_type = CONST_DATA_HIGHWAY_LVL then
+      v_fulfilled := true;    
+    end if;
+
+    return v_fulfilled;      
+  end dataitem_from_dhlevel;
+  
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function alternative_data_items_added (in_change_id in change.ch_id%type) return boolean is
+  
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    
+
+    return v_fulfilled;    
+  end alternative_data_items_added;
   
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   function dataitem_added_to_datasource (in_change_id in change.ch_id%type) return boolean is
@@ -377,7 +431,7 @@ create or replace package body change_adaptation as
     v_type varchar2(20);
     v_fulfilled boolean default false;
   begin
-    v_type := dataitem_added_to(in_change_id);
+    v_type := dataitem_from(in_change_id);
     if v_type = CONST_DATA_SOURCE then
       v_fulfilled := true;    
     end if;
@@ -391,7 +445,7 @@ create or replace package body change_adaptation as
     v_type varchar2(20);
     v_fulfilled boolean default false;
   begin
-    v_type := dataitem_added_to(in_change_id);
+    v_type := dataitem_from(in_change_id);
     if v_type = CONST_DATA_HIGHWAY_LVL then
       v_fulfilled := true;    
     end if;
@@ -411,7 +465,8 @@ create or replace package body change_adaptation as
              proc.cap_statustype_id   operation_status_id, 
              proc.manual_condition    manual_condition,
              proc.automatic_condition automatic_condition,
-             proc.cap_id              process_id
+             proc.cap_id              process_id,
+             proc.cas_parentscenario_id
         from (select cap.cap_statustype_id, 
                      cap.cap_id,
                      cas.*,
@@ -447,7 +502,7 @@ create or replace package body change_adaptation as
     select count(2)
       into v_not_fulfilled_count
       from ca_manualconditionfulfillment mcf
-     where mcf.camcf_condition_id in (select cac.cac_id
+     where (mcf.camcf_condition_id, mcf.camcf_change_id) in (select cac.cac_id, cap.cap_change_id
                                         from changeadaptationprocess cap
                                        inner join ca_conditionmapping cacm on cacm.cacm_scenario_id = cap.cap_scenario_id
                                        inner join changeadaptationcondition cac on cac.cac_id = cacm.cacm_condition_id
@@ -517,20 +572,38 @@ create or replace package body change_adaptation as
   procedure set_to_processed_if_all_exec(in_change_id in change.ch_id%type) is    
     v_count number(10);
     v_adapted number(10);
+    v_parent changeadaptationscenario.cas_id%type;
   begin
-    select sum(decode(cap_statustype_id,CONST_ADAPTED,1,0)), count(*) into v_adapted, v_count 
+    /*select sum(decode(cap_statustype_id,CONST_ADAPTED,1,0)), count(*) into v_adapted, v_count 
     from changeadaptationprocess where cap_change_id=in_change_id;
     
     if v_count>0 and v_count=v_adapted then
       update change set ch_statustype_id=CONST_PROCESSED where ch_id=in_change_id;
-    end if;
-    
+    end if;*/
+    begin
+      SELECT cas_parentscenario_id into v_parent
+        FROM (
+        SELECT CONNECT_BY_ROOT cas.cas_id as cas_parentscenario_id, cap_statustype_id
+            FROM (
+            select *
+            from changeadaptationprocess proc join changeadaptationscenario cas on cas.cas_id=proc.cap_scenario_id
+            where cap_change_id=in_change_id) cas    
+        START WITH cas.cas_parentscenario_id is null
+        CONNECT BY PRIOR cas.cas_id = cas.cas_parentscenario_id  )
+      GROUP BY cas_parentscenario_id
+      HAVING sum(decode(cap_statustype_id,'CIP0000002',1,0)) = count(*) and count(*)>0;    
+      
+      update change set ch_statustype_id=CONST_PROCESSED where ch_id=in_change_id;
+    exception 
+      when no_data_found then null;
+    end;
   end set_to_processed_if_all_exec;
   
 ---- Tries to execute adaptation scenario for specific change (only consecutive, not already adapted and automatic change scenario operations can be executed)
   procedure run_change_adaptation_scenario(in_change_id in change.ch_id%type) is
     v_change_scenario sys_refcursor;   
     v_scenario_step t_scenario_step;
+    v_next_first boolean := false;
   begin
     v_change_scenario := get_change_adaptation_scenario(in_change_id);
     loop
@@ -538,16 +611,21 @@ create or replace package body change_adaptation as
       exit when v_change_scenario%notfound;
 
       -- processes only not ADAPTED automatic changes
-      if v_scenario_step.operation_status_id = CONST_NOT_ADAPTED then
+      if v_next_first = false or v_next_first = true and v_scenario_step.cas_parentscenario_id is null then      
+        if v_scenario_step.operation_status_id = CONST_NOT_ADAPTED then
 
-        --check conditions if they exist
-        if v_scenario_step.operation_type_id = CONST_AUTOMATIC and conditions_fulfilled(in_change_id, v_scenario_step.automatic_condition, v_scenario_step.process_id) then
-          dbms_output.put_line(v_scenario_step.operation_instruction);
-          execute_adaptation_procedure(in_change_id, v_scenario_step.operation_instruction);
-          set_process_adapted(v_scenario_step.process_id);
+            --check conditions if they exist
+            if v_scenario_step.operation_type_id = CONST_AUTOMATIC and conditions_fulfilled(in_change_id, v_scenario_step.automatic_condition, v_scenario_step.process_id) then
+              dbms_output.put_line(v_scenario_step.operation_instruction);
+              execute_adaptation_procedure(in_change_id, v_scenario_step.operation_instruction);
+              set_process_adapted(v_scenario_step.process_id);
+              v_next_first := false;
+            else
+              v_next_first := true;
+            end if;
+        else
+          v_next_first := false;
         end if;
-
-        exit;
       end if;
 
     end loop;
@@ -575,6 +653,30 @@ create or replace package body change_adaptation as
     process_change_adaptations;
 
   end adapt_changes;
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  procedure del_dependent_mappings (in_di_id dataitem.di_id%type) is
+    v_count number(10);
+  begin
+    for v_map in (select * 
+        from mappingorigin join mapping on mp_id = ms_mapping_id
+        where ms_origin_dataitem_id=in_di_id) loop
+      
+      -- check if target data item may be obtained some other way
+      select count(*) into v_count
+        from mapping 
+        where mp_target_dataitem_id = v_map.mp_target_dataitem_id
+        and mp_deleted is null
+        and not exists (select 1 from mappingorigin where ms_mapping_id=mp_id and ms_origin_dataitem_id=in_di_id);
+      if v_count = 0 then
+      -- delete mappings for dependent data items
+        del_dependent_mappings(v_map.mp_target_dataitem_id);
+      end if;
+      
+      -- delete mapping
+      update mapping set mp_deleted = sysdate where mp_id=v_map.mp_id;
+    end loop;
+  end;
 
 ---- Rename data highway level -------------------------------------------------------------------------------------------------------------------------------------------------------------
   procedure rename_dhighlevel(in_change_id in change.ch_id%type) is
@@ -633,12 +735,47 @@ create or replace package body change_adaptation as
    null; -- to be implemented
   end get_dataitem_structure;
 
----- Get dataitem structure ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---- Set alternative data sources ------------------------------------------------------------------------------------------------------------------------------------------------------------
   procedure set_alternative_data_sources(in_change_id in change.ch_id%type) is
 
   begin
    null; -- to be implemented
   end set_alternative_data_sources;
+  
+---- Set alternative data items ------------------------------------------------------------------------------------------------------------------------------------------------------------
+  procedure set_alternative_data_items(in_change_id in change.ch_id%type) is
+
+  begin
+   null; -- to be implemented
+  end set_alternative_data_items;
+  
+---- Skip dependent data items ------------------------------------------------------------------------------------------------------------------------------------------------------------
+  procedure skip_dependent_dataitems(in_change_id in change.ch_id%type) is
+    v_di_id dataitem.di_id%type;
+  begin
+    select ch_dataitem_id into v_di_id
+      from change
+      where ch_id = in_change_id;
+    -- set mappings for dependent data items as deleted
+    del_dependent_mappings (v_di_id);
+   
+    -- get child data items
+    for v_child in (select re_child_dataitem_id as child_id
+        from relationship 
+        join relationshipelement on re_relationship_id=rl_id
+        where rl_parent_dataitem_id = v_di_id and rl_relationshiptype_id=CONT_REL_COMPOSITION) loop
+        
+      del_dependent_mappings (v_child.child_id);
+    end loop;
+  end skip_dependent_dataitems;
+  
+---- Replace dependent data items ---------------------------------------------------------------------------------------------------------------------------------------------------------
+  procedure replace_dependent_dataitems(in_change_id in change.ch_id%type) is
+
+  begin
+  
+   null; -- to be implemented
+  end replace_dependent_dataitems;
   
 ---- Get dataset id
   function get_additional_dataset_id(in_change_id in change.ch_id%type) return dataset.ds_id%type is
