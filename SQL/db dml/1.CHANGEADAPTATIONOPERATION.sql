@@ -74,3 +74,6 @@ values (24,'COP0000002','change_adaptation.skip_dependent_dataitems');
 
 Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
 values (25,'COP0000002','change_adaptation.replace_dependent_dataitems');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (26,'COP0000001','Adapt dependent ETL procedures to utilize the new value of the property');
