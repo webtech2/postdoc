@@ -43,6 +43,8 @@ create or replace package change_adaptation as
   
   function alternative_data_items_added (in_change_id in change.ch_id%type) return boolean;
   
+  function alternative_data_sources_added (in_change_id in change.ch_id%type) return boolean;
+
   procedure set_alternative_data_items(in_change_id in change.ch_id%type);
   
   procedure skip_dependent_dataitems(in_change_id in change.ch_id%type);
@@ -413,7 +415,17 @@ create or replace package body change_adaptation as
 
     return v_fulfilled;      
   end dataitem_from_dhlevel;
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function alternative_data_sources_added (in_change_id in change.ch_id%type) return boolean is
   
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    
+
+    return v_fulfilled;    
+  end alternative_data_sources_added;  
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   function alternative_data_items_added (in_change_id in change.ch_id%type) return boolean is
   

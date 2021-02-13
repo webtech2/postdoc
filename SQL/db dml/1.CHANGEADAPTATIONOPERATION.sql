@@ -22,7 +22,7 @@ Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION
 values (7,'COP0000002','change_adaptation.add_dataset_to_dhighwaylevel');
 
 Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
-values (8,'COP0000001','Define data highway level');
+values (8,'COP0000001','Choose data highway level');
 
 Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
 values (9,'COP0000002','change_adaptation.add_dataset_to_1st_dhighlevel');
@@ -43,7 +43,7 @@ Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION
 values (14,'COP0000002','change_adaptation.add_dataitem_to_dataset');
 
 Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
-values (15,'COP0000001','Change ETL processes in mapping metadata');
+values (15,'COP0000001','Change ETL processes');
 
 Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
 values (16,'COP0000001','Define alternative data sources');
@@ -77,3 +77,9 @@ values (25,'COP0000002','change_adaptation.replace_dependent_dataitems');
 
 Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
 values (26,'COP0000001','Adapt dependent ETL procedures to utilize the new value of the property');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (27,'COP0000002','change_adaptation.redefine_dependent_mappings');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (29,'COP0000002','change_adaptation.recreate_dataset_dataitems');

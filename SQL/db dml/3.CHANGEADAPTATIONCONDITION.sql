@@ -74,3 +74,15 @@ values (25,'change_adaptation.dataitem_from_dhlevel','CON0000001');
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
 values (26,'If changed property is used in ETL procedures','CON0000002');
 
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (27,'If there is an option to replace data set with data from another data sources','CON0000002');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (28,'If there are no options to replace data set with data from another data items','CON0000002');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (29,'If data set structure remains the same','CON0000002');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (30,'If data set structure changed','CON0000002');
+
