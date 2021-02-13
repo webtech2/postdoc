@@ -101,3 +101,38 @@ values (34,'change_adaptation.relationship_added_to_dhlevel','CON0000001');
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
 values (35,'change_adaptation.relationship_added_to_datasource','CON0000001');
 
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (36,'change_adaptation.relationship_fk','CON0000001');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (37,'change_adaptation.relationship_composition','CON0000001');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (38,'If child data items were moved elsewhere in the document structure','CON0000002');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (39,'change_adaptation.new_location_specified','CON0000001');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (40,'If a data item obtained using the deleted mapping can be replaced by another function','CON0000002');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (41,'If new data items are necessary for the replacement','CON0000002');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (42,'change_adaptation.mapping_replacement_added','CON0000001');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (43,'If a data item obtained using the deleted mapping can not be replaced by another function','CON0000002');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (44,'If new data items are not necessary for the replacement','CON0000002');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (45,'If any ETL procedures use the deleted property','CON0000002');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (46,'change_adaptation.dependent_mappings_specified','CON0000001');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (47,'If no ETL procedures use the deleted property','CON0000002');

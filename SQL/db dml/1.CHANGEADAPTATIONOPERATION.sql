@@ -99,3 +99,26 @@ values (33,'COP0000002','change_adaptation.add_relationship_to_1st_dhighlevel');
 Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
 values (34,'COP0000001','Redefine other data highway levels');
 
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (35,'COP0000002','change_adaptation.get_dependent_mappings');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (36,'COP0000001','Specify new locations of the affected data items');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (37,'COP0000002','change_adaptation.set_new_relationships');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (38,'COP0000001','Add necessary new data items');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (39,'COP0000001','Add information about the mapping replacement');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (40,'COP0000002','change_adaptation.add_mapping_replacement');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (41,'COP0000002','change_adaptation.mark_dependent_map_deleted');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (42,'COP0000001','Add information about the dependent mappings');
