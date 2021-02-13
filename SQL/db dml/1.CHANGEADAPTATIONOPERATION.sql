@@ -83,3 +83,19 @@ values (27,'COP0000002','change_adaptation.redefine_dependent_mappings');
 
 Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
 values (29,'COP0000002','change_adaptation.recreate_dataset_dataitems');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (30,'COP0000002','change_adaptation.rename_dataset');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (31,'COP0000002','change_adaptation.rename_dataitem');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (32,'COP0000001','Redefine mappings manually');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (33,'COP0000002','change_adaptation.add_relationship_to_1st_dhighlevel');
+
+Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
+values (34,'COP0000001','Redefine other data highway levels');
+

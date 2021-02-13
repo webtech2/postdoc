@@ -86,3 +86,18 @@ values (29,'If data set structure remains the same','CON0000002');
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
 values (30,'If data set structure changed','CON0000002');
 
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (31,'change_adaptation.dataset_dataitems_recreated','CON0000001');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (32,'If the change does not affect mappings','CON0000002');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (33,'If the change affects mappings','CON0000002');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (34,'change_adaptation.relationship_added_to_dhlevel','CON0000001');
+
+Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
+values (35,'change_adaptation.relationship_added_to_datasource','CON0000001');
+
