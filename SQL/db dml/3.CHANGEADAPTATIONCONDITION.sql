@@ -9,10 +9,10 @@ Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID
 values (8,'change_adaptation.exist_related_datasets','CON0000001');
 
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
-values (9,'change_adaptation.related_datasets_datasources_available','CON0000001');
+values (9,'change_adaptation.related_datasets_sources_avail','CON0000001');
 
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
-values (10,'change_adaptation.related_datasets_datasources_not_available','CON0000001');
+values (10,'change_adaptation.related_datasets_sources_not','CON0000001');
 
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
 values (11,'If there is an option to replace data source with data from another data sources','CON0000002');
@@ -42,10 +42,10 @@ Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID
 values (4,'If data set needs to be added to a data source','CON0000002');
 
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
-values (16,'change_adaptation.deleted_dataset_from_datasource','CON0000001');
+values (16,'change_adaptation.deleted_dataset_from_source','CON0000001');
 
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
-values (17,'change_adaptation.deleted_dataset_from_datahighwaylevel','CON0000001');
+values (17,'change_adaptation.deleted_dataset_from_dhlevel','CON0000001');
 
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
 values (18,'change_adaptation.dataitem_added_to_datasource','CON0000001');
@@ -99,7 +99,7 @@ Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID
 values (34,'change_adaptation.relationship_added_to_dhlevel','CON0000001');
 
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
-values (35,'change_adaptation.relationship_added_to_datasource','CON0000001');
+values (35,'change_adaptation.relationship_added_to_source','CON0000001');
 
 Insert into CHANGEADAPTATIONCONDITION (CAC_ID,CAC_CONDITION,CAC_CONDITIONTYPE_ID) 
 values (36,'change_adaptation.relationship_fk','CON0000001');

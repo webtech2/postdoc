@@ -14,6 +14,34 @@ create or replace package change_adaptation as
 
   function dataset_example_added(in_change_id in change.ch_id%type) return boolean;
 
+  function exist_related_datasets (in_change_id in change.ch_id%type) return boolean;
+  
+  function related_datasets_sources_avail (in_change_id in change.ch_id%type) return boolean;
+  
+  function related_datasets_sources_not (in_change_id in change.ch_id%type) return boolean;
+  
+  function dataitem_example_added (in_change_id in change.ch_id%type) return boolean;
+  
+  function deleted_dataset_from_source (in_change_id in change.ch_id%type) return boolean;
+  
+  function deleted_dataset_from_dhlevel (in_change_id in change.ch_id%type) return boolean;
+  
+  function dataset_dataitems_recreated (in_change_id in change.ch_id%type) return boolean;
+
+  function relationship_fk (in_change_id in change.ch_id%type) return boolean;
+  
+  function relationship_composition (in_change_id in change.ch_id%type) return boolean;
+  
+  function new_location_specified (in_change_id in change.ch_id%type) return boolean;
+  
+  function mapping_replacement_added (in_change_id in change.ch_id%type) return boolean;
+  
+  function dependent_mappings_specified (in_change_id in change.ch_id%type) return boolean;
+  
+  function relationship_added_to_dhlevel (in_change_id in change.ch_id%type) return boolean;
+  
+  function relationship_added_to_source (in_change_id in change.ch_id%type) return boolean;
+
   procedure set_process_adapted(in_process_id in changeadaptationprocess.cap_id%type);
 
   procedure run_change_adaptation_scenario(in_change_id in change.ch_id%type);
@@ -29,7 +57,19 @@ create or replace package change_adaptation as
 
   procedure get_dataset_structure(in_change_id in change.ch_id%type);
   
+  procedure add_dataset_to_dhighwaylevel(in_change_id in change.ch_id%type);
+  
+  procedure redefine_dependent_mappings(in_change_id in change.ch_id%type);
+  
   procedure add_dataset_to_1st_dhighlevel(in_change_id in change.ch_id%type);
+  
+  procedure set_alternative_data_sources(in_change_id in change.ch_id%type);
+  
+  procedure rename_dataset(in_change_id in change.ch_id%type);
+  
+  procedure add_relationship_to_1st_dhl(in_change_id in change.ch_id%type);
+  
+  procedure mark_dependent_map_deleted(in_change_id in change.ch_id%type);
   
   procedure add_dataitem_to_1st_dhighlevel(in_change_id in change.ch_id%type);
 
@@ -50,6 +90,14 @@ create or replace package change_adaptation as
   procedure skip_dependent_dataitems(in_change_id in change.ch_id%type);
   
   procedure replace_dependent_dataitems(in_change_id in change.ch_id%type);
+  
+  procedure rename_dataitem(in_change_id in change.ch_id%type);
+
+  procedure get_dependent_mappings(in_change_id in change.ch_id%type);
+  
+  procedure set_new_relationships(in_change_id in change.ch_id%type);
+  
+  procedure add_mapping_replacement(in_change_id in change.ch_id%type);
   
 end change_adaptation;
 /
@@ -417,6 +465,151 @@ create or replace package body change_adaptation as
   end dataitem_from_dhlevel;
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function exist_related_datasets (in_change_id in change.ch_id%type) return boolean is
+  
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    
+
+    return v_fulfilled;    
+  end exist_related_datasets; 
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function related_datasets_sources_avail (in_change_id in change.ch_id%type) return boolean is
+  
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    
+
+    return v_fulfilled;    
+  end related_datasets_sources_avail;  
+  
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function related_datasets_sources_not (in_change_id in change.ch_id%type) return boolean is
+  
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    
+
+    return v_fulfilled;    
+  end related_datasets_sources_not;  
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function deleted_dataset_from_source (in_change_id in change.ch_id%type) return boolean is
+  
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    
+
+    return v_fulfilled;    
+  end deleted_dataset_from_source;   
+  
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function deleted_dataset_from_dhlevel (in_change_id in change.ch_id%type) return boolean is
+  
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    
+
+    return v_fulfilled;    
+  end deleted_dataset_from_dhlevel;    
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function dataset_dataitems_recreated (in_change_id in change.ch_id%type) return boolean is
+  
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    
+
+    return v_fulfilled;    
+  end dataset_dataitems_recreated;   
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function relationship_fk (in_change_id in change.ch_id%type) return boolean is
+  
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    
+
+    return v_fulfilled;    
+  end relationship_fk;   
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function relationship_composition (in_change_id in change.ch_id%type) return boolean is
+  
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    
+
+    return v_fulfilled;    
+  end relationship_composition;
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function mapping_replacement_added (in_change_id in change.ch_id%type) return boolean is
+  
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    
+
+    return v_fulfilled;    
+  end mapping_replacement_added;  
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function dependent_mappings_specified (in_change_id in change.ch_id%type) return boolean is
+  
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    
+
+    return v_fulfilled;    
+  end dependent_mappings_specified;  
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function relationship_added_to_dhlevel (in_change_id in change.ch_id%type) return boolean is
+  
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    
+
+    return v_fulfilled;    
+  end relationship_added_to_dhlevel;  
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function relationship_added_to_source (in_change_id in change.ch_id%type) return boolean is
+  
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    
+
+    return v_fulfilled;    
+  end relationship_added_to_source;  
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function new_location_specified (in_change_id in change.ch_id%type) return boolean is
+  
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    
+
+    return v_fulfilled;    
+  end new_location_specified;
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  function dataitem_example_added (in_change_id in change.ch_id%type) return boolean is
+  
+    v_type varchar2(20);
+    v_fulfilled boolean default false;
+  begin
+    
+
+    return v_fulfilled;    
+  end dataitem_example_added;   
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   function alternative_data_sources_added (in_change_id in change.ch_id%type) return boolean is
   
     v_type varchar2(20);
@@ -753,7 +946,27 @@ create or replace package body change_adaptation as
   begin
    null; -- to be implemented
   end set_alternative_data_sources;
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+  procedure rename_dataset(in_change_id in change.ch_id%type) is
+
+  begin
+   null; -- to be implemented
+  end rename_dataset;
   
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+  procedure add_relationship_to_1st_dhl(in_change_id in change.ch_id%type) is
+
+  begin
+   null; -- to be implemented
+  end add_relationship_to_1st_dhl;
+  
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+  procedure mark_dependent_map_deleted(in_change_id in change.ch_id%type) is
+
+  begin
+   null; -- to be implemented
+  end mark_dependent_map_deleted;
+
 ---- Set alternative data items ------------------------------------------------------------------------------------------------------------------------------------------------------------
   procedure set_alternative_data_items(in_change_id in change.ch_id%type) is
 
@@ -788,7 +1001,37 @@ create or replace package body change_adaptation as
   
    null; -- to be implemented
   end replace_dependent_dataitems;
+---------------------------------------------------------------------------------------------------------------------------------------------------------  
+  procedure rename_dataitem(in_change_id in change.ch_id%type) is
+
+  begin
   
+   null; -- to be implemented
+  end rename_dataitem;
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------  
+  procedure add_mapping_replacement(in_change_id in change.ch_id%type) is
+
+  begin
+  
+   null; -- to be implemented
+  end add_mapping_replacement;  
+---------------------------------------------------------------------------------------------------------------------------------------------------------  
+  procedure set_new_relationships(in_change_id in change.ch_id%type) is
+
+  begin
+  
+   null; -- to be implemented
+  end set_new_relationships;
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------  
+  procedure get_dependent_mappings(in_change_id in change.ch_id%type) is
+
+  begin
+  
+   null; -- to be implemented
+  end get_dependent_mappings;
+
 ---- Get dataset id
   function get_additional_dataset_id(in_change_id in change.ch_id%type) return dataset.ds_id%type is
     v_dataset_id dataset.ds_id%type;
@@ -818,6 +1061,13 @@ create or replace package body change_adaptation as
        set ds_datahighwaylevel_id = v_datahighwaylevel_id
      where ds_id = v_dataset_id;
   end add_dataset_to_dhighwaylevel;
+  
+------------------------------------------------------------------------------------------------------------------------------------------------------
+  procedure redefine_dependent_mappings(in_change_id in change.ch_id%type) is
+   
+  begin
+   null;
+  end redefine_dependent_mappings;
 
 ---- Add dataset to the first data highway level
   procedure add_dataset_to_1st_dhighlevel(in_change_id in change.ch_id%type) is

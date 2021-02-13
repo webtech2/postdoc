@@ -94,7 +94,7 @@ Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION
 values (32,'COP0000001','Redefine mappings manually');
 
 Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
-values (33,'COP0000002','change_adaptation.add_relationship_to_1st_dhighlevel');
+values (33,'COP0000002','change_adaptation.add_relationship_to_1st_dhl');
 
 Insert into CHANGEADAPTATIONOPERATION (CAO_ID,CAO_OPERATIONTYPE_ID,CAO_OPERATION) 
 values (34,'COP0000001','Redefine other data highway levels');
